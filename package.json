@@ -1,0 +1,51 @@
+{
+  "name": "tofu-apps",
+  "version": "1.0.0",
+  "description": "Tofu Apps - Monorepo for wishlist and calendar apps",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "apps/backend/src/calendar/shared"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w backend",
+    "dev:backend": "npm run dev -w backend",
+    "dev:wishlist": "npm run dev -w wishlist-web",
+    "dev:calendar": "npm run dev -w calendar-web",
+    "dev:bot": "npm run dev -w discord-bot",
+    "build": "npm run build --workspaces --if-present",
+    "build:backend": "npm run build -w backend",
+    "build:wishlist": "npm run build -w wishlist-web",
+    "build:calendar": "npm run build -w calendar-web",
+    "build:all": "npm run build:backend && npm run build:wishlist && npm run build:calendar && npm run postbuild",
+    "postbuild": "npm run copy-frontends",
+    "copy-frontends": "node scripts/copy-frontends.js",
+    "start": "npm run start -w backend",
+    "migrate:wishlist": "npm run migrate:wishlist -w backend",
+    "migrate:calendar": "npm run migrate:calendar -w backend",
+    "migrate:all": "npm run migrate:all -w backend",
+    "generate": "npm run generate -w backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "format:check": "npm run format:check --workspaces --if-present",
+    "type-check": "npm run type-check -w backend",
+    "clean": "rm -rf apps/*/dist apps/*/node_modules node_modules apps/backend/public/*",
+    "install:all": "npm install",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "unified",
+    "monorepo",
+    "wishlist",
+    "calendar"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "typescript": "^5.3.3"
+  }
+}

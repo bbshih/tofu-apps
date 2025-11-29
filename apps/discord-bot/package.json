@@ -1,0 +1,16 @@
+{
+  "name": "discord-bot",
+  "version": "1.0.0",
+  "description": "SeaCalendar Discord bot",
+  "main": "dist/bot.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch bot.ts",
+    "build": "echo 'Discord bot builds with backend'",
+    "start": "node dist/bot.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tsx": "^4.7.0"
+  }
+}
