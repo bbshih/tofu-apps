@@ -44,17 +44,9 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Combine CORS origins from both apps
-      const allowedOrigins = [
-        ...(process.env.WISHLIST_CORS_ORIGIN?.split(',') || []),
-        ...(process.env.CALENDAR_CORS_ORIGINS?.split(',') || []),
-      ];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      // Allow all origins for bookmarklet endpoints (they run in third-party contexts)
+      // This will be checked in the request handler
+      callback(null, true);
     },
     credentials: true,
   })

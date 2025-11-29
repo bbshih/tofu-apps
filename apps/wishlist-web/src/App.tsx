@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import WishlistDetail from './pages/WishlistDetail';
+import Bookmarklet from './pages/Bookmarklet';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,6 +62,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <WishlistDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/bookmarklet"
+              element={
+                <PrivateRoute>
+                  <Bookmarklet />
                 </PrivateRoute>
               }
             />

@@ -53,6 +53,12 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-gray-900">My Wishlists</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Link
+                to="/bookmarklet"
+                className="text-sm text-indigo-600 hover:text-indigo-900 font-medium"
+              >
+                📌 Bookmarklet
+              </Link>
               <span className="text-sm text-gray-700">{user?.email}</span>
               <button
                 onClick={logout}

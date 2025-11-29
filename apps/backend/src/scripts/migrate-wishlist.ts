@@ -29,6 +29,20 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add bookmarklet token columns if they don't exist
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_name='users' AND column_name='bookmarklet_token') THEN
+    ALTER TABLE users ADD COLUMN bookmarklet_token TEXT UNIQUE;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_name='users' AND column_name='bookmarklet_token_created_at') THEN
+    ALTER TABLE users ADD COLUMN bookmarklet_token_created_at TIMESTAMP;
+  END IF;
+END $$;
+
 -- Wishlists table
 CREATE TABLE IF NOT EXISTS wishlists (
   id SERIAL PRIMARY KEY,
