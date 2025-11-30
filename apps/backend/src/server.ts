@@ -83,31 +83,45 @@ app.use('/api/calendar', calendarRoutes);
 const wishlistPublicPath = path.join(__dirname, '../public/wishlist');
 const calendarPublicPath = path.join(__dirname, '../public/calendar');
 
-// Host-based routing middleware
+// Host-based routing middleware - serve apps at root based on subdomain
 app.use((req, res, next) => {
   const host = req.hostname || req.get('host') || '';
 
-  // Determine which app to serve based on hostname
+  // Serve Wishlist app at root for wishlist subdomain
   if (host.includes('wishlist.billyeatstofu.com')) {
-    req.url = req.url.startsWith('/api/wishlist') || req.url.startsWith('/uploads') || req.url.startsWith('/health')
-      ? req.url
-      : `/wishlist${req.url}`;
-  } else if (host.includes('cal.billyeatstofu.com')) {
-    req.url = req.url.startsWith('/api/calendar') || req.url.startsWith('/api/auth') || req.url.startsWith('/socket.io') || req.url.startsWith('/health')
-      ? req.url
-      : `/calendar${req.url}`;
+    // Serve static files from wishlist public directory
+    express.static(wishlistPublicPath)(req, res, (err) => {
+      if (err) return next(err);
+      // If no static file found, serve index.html for SPA routing
+      if (!res.headersSent) {
+        res.sendFile(path.join(wishlistPublicPath, 'index.html'));
+      }
+    });
+    return;
+  }
+
+  // Serve Calendar app at root for cal subdomain
+  if (host.includes('cal.billyeatstofu.com')) {
+    // Serve static files from calendar public directory
+    express.static(calendarPublicPath)(req, res, (err) => {
+      if (err) return next(err);
+      // If no static file found, serve index.html for SPA routing
+      if (!res.headersSent) {
+        res.sendFile(path.join(calendarPublicPath, 'index.html'));
+      }
+    });
+    return;
   }
 
   next();
 });
 
-// Serve Wishlist frontend
+// Fallback routes for /wishlist and /calendar paths (for development/direct access)
 app.use('/wishlist', express.static(wishlistPublicPath));
 app.get('/wishlist/*', (req, res) => {
   res.sendFile(path.join(wishlistPublicPath, 'index.html'));
 });
 
-// Serve Calendar frontend
 app.use('/calendar', express.static(calendarPublicPath));
 app.get('/calendar/*', (req, res) => {
   res.sendFile(path.join(calendarPublicPath, 'index.html'));
