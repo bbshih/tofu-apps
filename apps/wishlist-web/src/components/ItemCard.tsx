@@ -7,7 +7,7 @@ interface ItemCardProps {
 
 export default function ItemCard({ item, onDelete }: ItemCardProps) {
   const imageUrl = item.image_path
-    ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/wishlist'}/uploads/${item.image_path}`
+    ? `/api/wishlist/uploads/${item.image_path}`
     : null;
 
   // Convert prices to numbers (they come from DB as strings)
