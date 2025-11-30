@@ -83,6 +83,24 @@ app.use('/api/calendar', calendarRoutes);
 const wishlistPublicPath = path.join(__dirname, '../public/wishlist');
 const calendarPublicPath = path.join(__dirname, '../public/calendar');
 
+// Host-based routing middleware
+app.use((req, res, next) => {
+  const host = req.hostname || req.get('host') || '';
+
+  // Determine which app to serve based on hostname
+  if (host.includes('wishlist.billyeatstofu.com')) {
+    req.url = req.url.startsWith('/api/wishlist') || req.url.startsWith('/uploads') || req.url.startsWith('/health')
+      ? req.url
+      : `/wishlist${req.url}`;
+  } else if (host.includes('cal.billyeatstofu.com')) {
+    req.url = req.url.startsWith('/api/calendar') || req.url.startsWith('/api/auth') || req.url.startsWith('/socket.io') || req.url.startsWith('/health')
+      ? req.url
+      : `/calendar${req.url}`;
+  }
+
+  next();
+});
+
 // Serve Wishlist frontend
 app.use('/wishlist', express.static(wishlistPublicPath));
 app.get('/wishlist/*', (req, res) => {
@@ -95,21 +113,29 @@ app.get('/calendar/*', (req, res) => {
   res.sendFile(path.join(calendarPublicPath, 'index.html'));
 });
 
-// Root redirect
+// Root fallback
 app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-      <head><title>Unified Apps</title></head>
-      <body style="font-family: sans-serif; padding: 40px;">
-        <h1>Unified Apps Server</h1>
-        <ul>
-          <li><a href="/wishlist">Wishlist App</a></li>
-          <li><a href="/calendar">Calendar App</a></li>
-        </ul>
-      </body>
-    </html>
-  `);
+  const host = req.hostname || req.get('host') || '';
+
+  if (host.includes('wishlist')) {
+    res.sendFile(path.join(wishlistPublicPath, 'index.html'));
+  } else if (host.includes('cal')) {
+    res.sendFile(path.join(calendarPublicPath, 'index.html'));
+  } else {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Unified Apps</title></head>
+        <body style="font-family: sans-serif; padding: 40px;">
+          <h1>Unified Apps Server</h1>
+          <ul>
+            <li><a href="https://wishlist.billyeatstofu.com">Wishlist App</a></li>
+            <li><a href="https://cal.billyeatstofu.com">Calendar App</a></li>
+          </ul>
+        </body>
+      </html>
+    `);
+  }
 });
 
 // Initialize Socket.io handlers for Calendar
