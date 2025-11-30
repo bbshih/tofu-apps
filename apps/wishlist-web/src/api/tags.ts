@@ -7,16 +7,16 @@ interface TagWithCount extends Tag {
 
 export const tagsApi = {
   getAll: async (): Promise<TagWithCount[]> => {
-    const response = await apiClient.get<TagWithCount[]>('/tags');
+    const response = await apiClient.get<TagWithCount[]>('/wishlist/tags');
     return response.data;
   },
 
   create: async (name: string): Promise<Tag> => {
-    const response = await apiClient.post<Tag>('/tags', { name });
+    const response = await apiClient.post<Tag>('/wishlist/tags', { name });
     return response.data;
   },
 
   delete: async (id: number): Promise<void> => {
-    await apiClient.delete(`/tags/${id}`);
+    await apiClient.delete(`/wishlist/tags/${id}`);
   },
 };
