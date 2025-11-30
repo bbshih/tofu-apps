@@ -7,6 +7,9 @@ import path from "path";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: "/", // Changed from "/seacalendar/" for Vercel deployment
+  build: {
+    sourcemap: true,
+  },
   resolve: {
     alias: {
       "@seacalendar/shared": path.resolve(__dirname, "../backend/src/seacalendar/shared/dist"),

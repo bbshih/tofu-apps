@@ -15,7 +15,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize state from localStorage to avoid effect
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (!savedUser || savedUser === 'undefined' || savedUser === 'null') {
+      return null;
+    }
+    try {
+      return JSON.parse(savedUser);
+    } catch {
+      return null;
+    }
   });
   const [token, setToken] = useState<string | null>(() => {
     return localStorage.getItem('authToken');
