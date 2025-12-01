@@ -26,5 +26,5 @@
     "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.e2e.test.ts", "src/discord-bot/**/*"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.e2e.test.ts"]
 }
