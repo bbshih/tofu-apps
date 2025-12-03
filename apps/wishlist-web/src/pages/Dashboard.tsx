@@ -14,7 +14,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const { user, logout } = useAuth();
 
-  const { data: wishlists, isLoading } = useQuery({
+  const { data: wishlists, isLoading, error } = useQuery({
     queryKey: ['wishlists'],
     queryFn: wishlistsApi.getAll,
   });
@@ -122,7 +122,15 @@ export default function Dashboard() {
             <div className="text-center py-12">
               <div className="text-gray-500">Loading wishlists...</div>
             </div>
-          ) : wishlists && wishlists.length > 0 ? (
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="rounded-md bg-red-50 p-4">
+                <p className="text-sm text-red-800">
+                  {(error as any)?.response?.data?.error || 'Failed to load wishlists. Please try again.'}
+                </p>
+              </div>
+            </div>
+          ) : wishlists && Array.isArray(wishlists) && wishlists.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {wishlists.map((wishlist) => (
                 <div
