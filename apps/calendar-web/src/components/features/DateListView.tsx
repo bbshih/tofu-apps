@@ -18,22 +18,22 @@ export default function DateListView({
       {groupedByMonth.map((monthGroup) => (
         <div key={monthGroup.month}>
           {/* Month Header */}
-          <h3 className="text-lg font-bold text-ocean-700 mb-3">
+          <h3 className="text-lg font-bold text-primary-700 mb-3">
             {monthGroup.month} ({monthGroup.dates.length} {monthGroup.dates.length === 1 ? 'date' : 'dates'})
           </h3>
 
           {/* Table View */}
           <div className="overflow-x-auto">
-            <table className="w-full border-2 border-ocean-200 rounded-lg overflow-hidden">
+            <table className="w-full border-2 border-primary-200 rounded-lg overflow-hidden">
               <thead>
-                <tr className="bg-ocean-100">
-                  <th className="px-4 py-2 text-left text-sm font-semibold text-ocean-800 border-r border-ocean-200">
+                <tr className="bg-primary-100">
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-primary-800 border-r border-primary-200">
                     Day
                   </th>
-                  <th className="px-4 py-2 text-left text-sm font-semibold text-ocean-800 border-r border-ocean-200">
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-primary-800 border-r border-primary-200">
                     Date
                   </th>
-                  <th className="px-4 py-2 text-center text-sm font-semibold text-ocean-800">
+                  <th className="px-4 py-2 text-center text-sm font-semibold text-primary-800">
                     Action
                   </th>
                 </tr>
@@ -45,23 +45,23 @@ export default function DateListView({
                   return (
                     <tr
                       key={dateInfo.dateOption.id}
-                      className={`border-t border-ocean-200 transition-colors ${
+                      className={`border-t border-primary-200 transition-colors ${
                         isWeekend
-                          ? 'bg-sand-100 hover:bg-sand-200'
-                          : 'bg-white hover:bg-ocean-50'
+                          ? 'bg-light-100 hover:bg-light-200'
+                          : 'bg-white hover:bg-primary-50'
                       }`}
                     >
                       {/* Day of Week */}
                       <td
-                        className={`px-4 py-3 border-r border-ocean-200 font-medium ${
-                          isWeekend ? 'text-coral-600' : 'text-gray-700'
+                        className={`px-4 py-3 border-r border-primary-200 font-medium ${
+                          isWeekend ? 'text-accent-600' : 'text-gray-700'
                         }`}
                       >
                         {dateInfo.dayOfWeek}
                       </td>
 
                       {/* Date */}
-                      <td className="px-4 py-3 border-r border-ocean-200 text-gray-800">
+                      <td className="px-4 py-3 border-r border-primary-200 text-gray-800">
                         {dateInfo.dateOption.label}
                       </td>
 

@@ -3,6 +3,7 @@
  * Aggregates all wishlist-related routes
  */
 
+import './config.js'; // Validate environment variables on startup
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import express from 'express';
@@ -15,11 +16,37 @@ const __dirname = path.dirname(__filename);
 
 const router = Router();
 
-// Serve uploaded images (before rate limiting)
+// Import authentication middleware
+import { authenticateToken } from './middleware/auth.js';
+
+// Serve uploaded images with authentication and rate limiting
 const uploadDir = process.env.WISHLIST_UPLOAD_DIR || path.resolve(__dirname, '../../uploads');
 console.log('Wishlist upload directory:', uploadDir);
 console.log('Upload directory exists:', fs.existsSync(uploadDir));
-router.use('/uploads', express.static(uploadDir));
+
+const imageLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // 60 requests per minute
+});
+
+router.use('/uploads', imageLimiter, authenticateToken, (req, res, next) => {
+  // Validate filename to prevent path traversal
+  const filename = path.basename(req.path);
+  if (!/^[a-f0-9]{32}\.jpg$/.test(filename)) {
+    return res.status(400).json({ error: 'Invalid filename' });
+  }
+
+  // Set security headers
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'Cache-Control': 'private, max-age=3600',
+  });
+
+  express.static(uploadDir, {
+    index: false,
+    dotfiles: 'deny',
+  })(req, res, next);
+});
 
 // Debug endpoint to check upload dir
 router.get('/uploads-debug', (req, res) => {

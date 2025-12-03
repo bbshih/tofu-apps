@@ -96,7 +96,7 @@ export default function DatePatternPresets({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <svg
-              className="w-4 h-4 text-coral-600"
+              className="w-4 h-4 text-accent-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -108,7 +108,7 @@ export default function DatePatternPresets({
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="text-sm font-semibold text-coral-800">
+            <h3 className="text-sm font-semibold text-accent-800">
               Recently Used
             </h3>
           </div>
@@ -129,16 +129,16 @@ export default function DatePatternPresets({
                   }
                   className={`group relative p-3 rounded-lg border-2 transition-all duration-200 text-left hover:shadow-md cursor-pointer ${
                     isSelected
-                      ? "border-coral-500 bg-coral-200 shadow-md"
-                      : "border-coral-200 bg-coral-50 hover:border-coral-400 hover:bg-coral-100"
+                      ? "border-accent-500 bg-accent-200 shadow-md"
+                      : "border-accent-200 bg-accent-50 hover:border-accent-400 hover:bg-accent-100"
                   }`}
                 >
                   <div className="flex flex-col gap-0.5">
                     <div
                       className={`text-sm font-medium ${
                         isSelected
-                          ? "text-coral-900"
-                          : "text-coral-800 group-hover:text-coral-900"
+                          ? "text-accent-900"
+                          : "text-accent-800 group-hover:text-accent-900"
                       }`}
                     >
                       {pattern.label}
@@ -158,7 +158,7 @@ export default function DatePatternPresets({
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <svg
-            className="w-5 h-5 text-ocean-600"
+            className="w-5 h-5 text-primary-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -170,7 +170,7 @@ export default function DatePatternPresets({
               d="M13 10V3L4 14h7v7l9-11h-7z"
             />
           </svg>
-          <h3 className="font-semibold text-ocean-800">Quick Patterns</h3>
+          <h3 className="font-semibold text-primary-800">Quick Patterns</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -188,16 +188,16 @@ export default function DatePatternPresets({
                 }
                 className={`group relative p-4 rounded-lg border-2 transition-all duration-200 text-left hover:shadow-md cursor-pointer ${
                   isSelected
-                    ? "border-ocean-500 bg-ocean-100 shadow-md"
-                    : "border-ocean-200 bg-white hover:border-ocean-400 hover:bg-ocean-50"
+                    ? "border-primary-500 bg-primary-100 shadow-md"
+                    : "border-primary-200 bg-white hover:border-primary-400 hover:bg-primary-50"
                 }`}
               >
                 <div className="flex flex-col gap-1">
                   <div
                     className={`font-medium ${
                       isSelected
-                        ? "text-ocean-900"
-                        : "text-ocean-800 group-hover:text-ocean-900"
+                        ? "text-primary-900"
+                        : "text-primary-800 group-hover:text-primary-900"
                     }`}
                   >
                     {preset.label}
@@ -207,9 +207,9 @@ export default function DatePatternPresets({
                   </div>
                 </div>
 
-                {/* Wave animation on hover */}
+                {/* Progress bar animation on hover */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-ocean-400 to-coral-400 transform transition-transform duration-300 origin-left rounded-full ${
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-400 to-accent-400 transform transition-transform duration-300 origin-left rounded-full ${
                     isSelected
                       ? "scale-x-100"
                       : "scale-x-0 group-hover:scale-x-100"

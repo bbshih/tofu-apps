@@ -110,7 +110,7 @@ export default function VotingPageDb() {
 
   if (poll.status === "CANCELLED") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sand-50 to-ocean-50 p-4 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-light-50 to-primary-50 p-4 flex items-center justify-center">
         <Card className="max-w-md w-full text-center">
           <h2 className="text-xl font-bold text-gray-800 mb-2">
             Event Cancelled
@@ -127,17 +127,17 @@ export default function VotingPageDb() {
   const sortedOptions = [...poll.options].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand-50 to-ocean-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-light-50 to-primary-50 p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <Card className="mb-6">
           <div className="flex items-start gap-4">
             <IconBoxMultiple
               size={48}
-              className="text-ocean-600 flex-shrink-0"
+              className="text-primary-600 flex-shrink-0"
             />
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-ocean-600 mb-2">
+              <h1 className="text-2xl font-bold text-primary-600 mb-2">
                 {poll.title}
               </h1>
               {poll.description && (
@@ -147,7 +147,7 @@ export default function VotingPageDb() {
                 Created by {poll.creatorName}
               </p>
               {poll.votingDeadline && (
-                <p className="text-sm text-coral-500 mt-1">
+                <p className="text-sm text-accent-500 mt-1">
                   Voting ends:{" "}
                   {new Date(poll.votingDeadline).toLocaleDateString()}
                 </p>
@@ -174,8 +174,8 @@ export default function VotingPageDb() {
                   onClick={() => toggleOption(option.id)}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left cursor-pointer ${
                     isAvailable
-                      ? "border-seaweed-500 bg-seaweed-50"
-                      : "border-gray-200 hover:border-ocean-300"
+                      ? "border-success-500 bg-success-50"
+                      : "border-gray-200 hover:border-primary-300"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -198,7 +198,7 @@ export default function VotingPageDb() {
                     </div>
                     <div className="text-2xl">
                       {isAvailable ? (
-                        <IconCheck size={32} className="text-seaweed-600" />
+                        <IconCheck size={32} className="text-success-600" />
                       ) : (
                         <IconSquare size={32} className="text-gray-400" />
                       )}
@@ -220,7 +220,7 @@ export default function VotingPageDb() {
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Any additional comments..."
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean-500 focus:border-ocean-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </Card>
 
@@ -252,7 +252,7 @@ export default function VotingPageDb() {
             <div className="text-center">
               <IconConfetti
                 size={64}
-                className="mx-auto mb-4 text-seaweed-600"
+                className="mx-auto mb-4 text-success-600"
               />
               <p className="text-gray-700 mb-6">
                 Your vote has been recorded successfully!

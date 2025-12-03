@@ -12,7 +12,7 @@ import {
   ButtonStyle,
 } from 'discord.js';
 import { getPollWithDetails, generateVotingUrl } from '../services/pollService.js';
-import { prisma } from '../../seacalendar/prisma.js';
+import { prisma } from '../../calendar/prisma.js';
 import { Config } from '../config.js';
 
 export const data = new SlashCommandBuilder()

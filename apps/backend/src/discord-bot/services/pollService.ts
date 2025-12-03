@@ -3,7 +3,7 @@
  * Handles poll/event creation and management
  */
 
-import { prisma, PollType, PollStatus, User, Poll, PollOption } from '../../seacalendar/prisma.js';
+import { prisma, PollType, PollStatus, User, Poll, PollOption } from '../../calendar/prisma.js';
 import { Config } from '../config.js';
 
 export interface CreatePollInput {

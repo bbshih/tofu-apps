@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sand-50 to-ocean-50 p-4 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-light-50 to-primary-50 p-4 flex items-center justify-center">
         <Card className="max-w-md w-full text-center">
           <p className="text-gray-600">Loading...</p>
         </Card>

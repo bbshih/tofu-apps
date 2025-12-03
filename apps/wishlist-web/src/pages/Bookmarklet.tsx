@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../api/client';
 import { generateBookmarkletScript, getApiUrl } from '../utils/bookmarklet';
+import { setBookmarkletPageTitle } from '../utils/metaTags';
 
 interface BookmarkletToken {
   token: string;
@@ -10,6 +11,9 @@ interface BookmarkletToken {
 }
 
 export default function Bookmarklet() {
+  useEffect(() => {
+    setBookmarkletPageTitle();
+  }, []);
   const { user } = useAuth();
   const [tokenData, setTokenData] = useState<BookmarkletToken | null>(null);
   const [loading, setLoading] = useState(false);

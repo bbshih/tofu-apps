@@ -7,18 +7,18 @@ export default function LandingPage() {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-b from-ocean-50 to-ocean-100">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-b from-primary-50 to-primary-100">
       <div className="text-center max-w-4xl mx-auto">
         {/* Main title with gradient and animations */}
         <div className="mb-8 animate-slide-down">
-          <h1 className="text-6xl md:text-8xl">SeaCalendar</h1>
+          <h1 className="text-6xl md:text-8xl">Calendar</h1>
         </div>
 
         {/* Discord chat conversation */}
         <div className="max-w-2xl mx-auto mb-8 bg-[#36393f] rounded-lg p-4 text-left shadow-lg">
           {/* You message */}
           <div className="flex gap-3 mb-4 animate-slide-up">
-            <div className="w-10 h-10 rounded-full bg-ocean-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 rounded-full bg-primary-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
               Y
             </div>
             <div className="flex-1">
@@ -46,7 +46,7 @@ export default function LandingPage() {
 
           {/* You message with link */}
           <div className="flex gap-3 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <div className="w-10 h-10 rounded-full bg-ocean-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 rounded-full bg-primary-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
               Y
             </div>
             <div className="flex-1">
@@ -55,7 +55,7 @@ export default function LandingPage() {
                 <span className="text-xs text-gray-400">12:36 PM</span>
               </div>
               <p className="text-gray-100">
-                <span className="text-blue-400 hover:underline cursor-pointer">Vote on SeaCalendar</span>
+                <span className="text-blue-400 hover:underline cursor-pointer">Vote on Calendar</span>
               </p>
             </div>
           </div>
@@ -66,20 +66,20 @@ export default function LandingPage() {
           style={{ animationDelay: "0.2s" }}
         >
           <Card variant="glass" hover3d className="text-center">
-            <h3 className="font-bold text-ocean-700 text-lg mb-2">
+            <h3 className="font-bold text-primary-700 text-lg mb-2">
               Pick Dates
             </h3>
-            <p className="text-sm text-ocean-600">Suggest multiple options</p>
+            <p className="text-sm text-primary-600">Suggest multiple options</p>
           </Card>
           <Card variant="glass" hover3d className="text-center">
-            <h3 className="font-bold text-ocean-700 text-lg mb-2">Vote Easy</h3>
-            <p className="text-sm text-ocean-600">Everyone picks their faves</p>
+            <h3 className="font-bold text-primary-700 text-lg mb-2">Vote Easy</h3>
+            <p className="text-sm text-primary-600">Everyone picks their faves</p>
           </Card>
           <Card variant="glass" hover3d className="text-center">
-            <h3 className="font-bold text-ocean-700 text-lg mb-2">
+            <h3 className="font-bold text-primary-700 text-lg mb-2">
               Lock It In
             </h3>
-            <p className="text-sm text-ocean-600">See results & decide</p>
+            <p className="text-sm text-primary-600">See results & decide</p>
           </Card>
         </div>
 
@@ -105,7 +105,7 @@ export default function LandingPage() {
 
         {/* Fun tagline */}
         <p
-          className="mt-8 text-ocean-600 text-sm md:text-base animate-fade-in"
+          className="mt-8 text-primary-600 text-sm md:text-base animate-fade-in"
           style={{ animationDelay: "0.4s" }}
         >
           No pressure. Just vibes.

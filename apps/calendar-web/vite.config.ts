@@ -12,7 +12,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@seacalendar/shared": path.resolve(__dirname, "../backend/src/seacalendar/shared/dist"),
+      "@seacalendar/shared": path.resolve(__dirname, "../backend/src/calendar/shared/dist"),
     },
   },
   optimizeDeps: {

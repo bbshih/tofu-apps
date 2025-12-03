@@ -31,11 +31,11 @@ export default function ErrorState({
   };
 
   return (
-      <div className="min-h-screen p-4 md:p-8 flex items-center justify-center bg-gradient-to-b from-ocean-50 to-ocean-100">
+      <div className="min-h-screen p-4 md:p-8 flex items-center justify-center bg-gradient-to-b from-primary-50 to-primary-100">
         <div className="max-w-md mx-auto">
           <Card>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-ocean-700 mb-4">
+              <h1 className="text-2xl font-bold text-primary-700 mb-4">
                 {title}
               </h1>
               <p className="text-red-600 mb-6">{error}</p>

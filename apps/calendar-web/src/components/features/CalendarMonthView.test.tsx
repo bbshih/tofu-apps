@@ -179,7 +179,7 @@ describe('CalendarMonthView', () => {
     // Click on the selected day 15
     const dayButtons = screen.getAllByText(targetDay.toString());
     const selectedButton = dayButtons.find((btn) =>
-      btn.className.includes('bg-ocean-500')
+      btn.className.includes('bg-primary-500')
     );
 
     if (selectedButton) {

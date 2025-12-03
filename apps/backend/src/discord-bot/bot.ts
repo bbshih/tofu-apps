@@ -1,5 +1,5 @@
 /**
- * SeaCalendar Discord Bot
+ * TofuBot Discord Bot
  * Main entry point for the Discord bot
  */
 
@@ -9,7 +9,7 @@ import { Command } from './types/command.js';
 import { readdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { prisma } from '../../seacalendar/prisma.js';
+import { prisma } from '../calendar/prisma.js';
 import cron from 'node-cron';
 import { DateTime } from 'luxon';
 import * as qotwService from './services/qotwService.js';
@@ -327,7 +327,7 @@ process.on('SIGTERM', shutdown);
  */
 async function main() {
   try {
-    console.log('Starting SeaCalendar Discord Bot...\n');
+    console.log('Starting TofuBot Discord Bot...\n');
 
     // Test database connection
     console.log('📊 Testing database connection...');

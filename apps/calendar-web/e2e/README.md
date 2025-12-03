@@ -1,4 +1,4 @@
-# SeaCalendar E2E Tests
+# Calendar E2E Tests
 
 End-to-end tests using Playwright.
 

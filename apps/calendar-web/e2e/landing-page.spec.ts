@@ -9,7 +9,7 @@ test.describe('Landing Page', () => {
     await page.goto('/');
 
     // Check main heading
-    await expect(page.getByRole('heading', { name: /SeaCalendar/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Calendar/i })).toBeVisible();
 
     // Check for ocean theme elements
     await expect(page.locator('body')).toHaveClass(/bg-/); // Should have background color
@@ -41,7 +41,7 @@ test.describe('Landing Page', () => {
     await page.goto('/');
 
     // Page should still be visible and functional
-    await expect(page.getByRole('heading', { name: /SeaCalendar/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Calendar/i })).toBeVisible();
 
     const createButton = page.locator('a:has-text("Create Event"), button:has-text("Create Event")').first();
     await expect(createButton).toBeVisible();

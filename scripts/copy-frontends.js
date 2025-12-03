@@ -15,7 +15,7 @@ const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 const backendPublic = join(rootDir, 'apps/backend/public');
 const wishlistDist = join(rootDir, 'apps/wishlist-web/dist');
-const seacalendarDist = join(rootDir, 'apps/seacalendar-web/dist');
+const calendarDist = join(rootDir, 'apps/calendar-web/dist');
 
 /**
  * Recursively copy directory
@@ -49,11 +49,11 @@ try {
   copyRecursive(wishlistDist, wishlistTarget);
   console.log('✅ Wishlist frontend copied\n');
 
-  // Copy SeaCalendar frontend
-  console.log('Copying seacalendar-web/dist → backend/public/seacalendar');
-  const seacalendarTarget = join(backendPublic, 'seacalendar');
-  copyRecursive(seacalendarDist, seacalendarTarget);
-  console.log('✅ SeaCalendar frontend copied\n');
+  // Copy Calendar frontend
+  console.log('Copying calendar-web/dist → backend/public/calendar');
+  const calendarTarget = join(backendPublic, 'calendar');
+  copyRecursive(calendarDist, calendarTarget);
+  console.log('✅ Calendar frontend copied\n');
 
   console.log('✅ All frontends copied successfully!');
 } catch (error) {

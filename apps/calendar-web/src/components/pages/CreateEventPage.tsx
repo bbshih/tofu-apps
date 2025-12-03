@@ -16,6 +16,7 @@ import CalendarMonthView from "../features/CalendarMonthView";
 import DatePatternPresets from "../features/DatePatternPresets";
 import { parseDateFromNaturalLanguage } from "../../utils/naturalLanguageDateParser";
 import { NotificationTemplates } from "../../utils/notifications";
+import { setCreateEventPageMeta } from "../../utils/metaTags";
 import type { DateOption } from "../../types/local";
 
 type OptionType = "DATE" | "TEXT";
@@ -52,6 +53,11 @@ export default function CreateEventPage() {
   // Refs for focusing and scrolling to invalid fields
   const titleInputRef = useRef<HTMLInputElement>(null);
   const optionsCardRef = useRef<HTMLDivElement>(null);
+
+  // Set page title
+  useEffect(() => {
+    setCreateEventPageMeta();
+  }, []);
 
   // Load draft on mount
   useEffect(() => {
@@ -271,12 +277,12 @@ export default function CreateEventPage() {
     : "";
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-gradient-to-b from-ocean-50 to-ocean-100">
+    <div className="min-h-screen p-4 md:p-8 bg-gradient-to-b from-primary-50 to-primary-100">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 animate-slide-down">
           <h1
-            className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-r from-ocean-600 via-coral-500 to-ocean-500 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_100%]"
+            className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-r from-primary-600 via-accent-500 to-primary-500 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_100%]"
             style={{
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -284,14 +290,14 @@ export default function CreateEventPage() {
           >
             Create Event
           </h1>
-          <p className="text-lg text-ocean-700 font-semibold animate-slide-up">
+          <p className="text-lg text-primary-700 font-semibold animate-slide-up">
             Plan your next hangout with friends
           </p>
         </div>
 
         {/* Event Details */}
         <Card className="mb-6 animate-fade-in">
-          <h2 className="text-xl font-bold text-ocean-700 mb-4">
+          <h2 className="text-xl font-bold text-primary-700 mb-4">
             <IconList size={24} className="inline mr-2" /> Event Details
           </h2>
 
@@ -321,7 +327,7 @@ export default function CreateEventPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add any additional details..."
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean-500 focus:border-ocean-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
           </div>
@@ -332,7 +338,7 @@ export default function CreateEventPage() {
           className="mb-6 animate-fade-in"
           style={{ animationDelay: "0.1s" }}
         >
-          <h2 className="text-xl font-bold text-ocean-700 mb-4">Option Type</h2>
+          <h2 className="text-xl font-bold text-primary-700 mb-4">Option Type</h2>
           <div className="flex gap-3">
             <Button
               variant={optionType === "DATE" ? "primary" : "outline"}
@@ -358,7 +364,7 @@ export default function CreateEventPage() {
             className="mb-6 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
-            <h2 className="text-xl font-bold text-ocean-700 mb-4">
+            <h2 className="text-xl font-bold text-primary-700 mb-4">
               Pick Dates ({dateOptions.length} selected)
             </h2>
             {optionsError && (
@@ -368,8 +374,8 @@ export default function CreateEventPage() {
             )}
 
             {/* Natural Language Date Input */}
-            <div className="mb-4 p-4 bg-ocean-50 rounded-lg border border-ocean-200">
-              <label className="block text-sm font-semibold text-ocean-700 mb-2">
+            <div className="mb-4 p-4 bg-primary-50 rounded-lg border border-primary-200">
+              <label className="block text-sm font-semibold text-primary-700 mb-2">
                 <IconSparkles size={18} className="inline mr-1" /> Quick Add
                 (Natural Language)
               </label>
@@ -409,7 +415,7 @@ export default function CreateEventPage() {
             />
 
             {dateOptions.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-ocean-200">
+              <div className="mt-4 pt-4 border-t border-primary-200">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
                   Selected Dates:
                 </h3>
@@ -417,7 +423,7 @@ export default function CreateEventPage() {
                   {dateOptions.map((opt, i) => (
                     <div
                       key={i}
-                      className="px-3 py-1 bg-ocean-100 text-ocean-700 rounded-full text-sm font-medium flex items-center gap-2"
+                      className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium flex items-center gap-2"
                     >
                       <span>{opt.label}</span>
                       <button
@@ -442,7 +448,7 @@ export default function CreateEventPage() {
             className="mb-6 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
-            <h2 className="text-xl font-bold text-ocean-700 mb-4">
+            <h2 className="text-xl font-bold text-primary-700 mb-4">
               Custom Options ({textOptions.length} added)
             </h2>
             {optionsError && (
@@ -471,7 +477,7 @@ export default function CreateEventPage() {
               </div>
 
               {textOptions.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-ocean-200">
+                <div className="mt-4 pt-4 border-t border-primary-200">
                   <h3 className="text-sm font-medium text-gray-700 mb-2">
                     Options:
                   </h3>
@@ -479,9 +485,9 @@ export default function CreateEventPage() {
                     {textOptions.map((opt) => (
                       <div
                         key={opt.id}
-                        className="flex items-center justify-between px-4 py-3 bg-ocean-50 rounded-lg"
+                        className="flex items-center justify-between px-4 py-3 bg-primary-50 rounded-lg"
                       >
-                        <span className="text-ocean-700 font-medium">
+                        <span className="text-primary-700 font-medium">
                           {opt.label}
                         </span>
                         <button

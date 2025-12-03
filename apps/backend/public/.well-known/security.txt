@@ -1,0 +1,21 @@
+Contact: mailto:security@billyeatstofu.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://wishlist.billyeatstofu.com/.well-known/security.txt
+Policy: https://wishlist.billyeatstofu.com/security-policy
+Acknowledgments: https://wishlist.billyeatstofu.com/security-acknowledgments
+
+# Security Disclosure
+If you believe you've found a security vulnerability in our applications,
+please report it to us as soon as possible. We appreciate your efforts to
+responsibly disclose your findings.
+
+# Response Time
+We aim to acknowledge security reports within 48 hours and provide an
+initial assessment within 7 days.
+
+# Scope
+This security policy applies to:
+- https://wishlist.billyeatstofu.com
+- https://cal.billyeatstofu.com
+- Associated APIs and services

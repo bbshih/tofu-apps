@@ -49,11 +49,11 @@ export default function NotificationPrompt() {
 
   return (
     <div className="fixed bottom-4 right-4 max-w-sm z-50 animate-slide-up">
-      <Card className="shadow-2xl border-2 border-ocean-300">
+      <Card className="shadow-2xl border-2 border-primary-300">
         <div className="flex items-start gap-3">
-          <IconBell size={32} className="text-ocean-600 flex-shrink-0 mt-1" />
+          <IconBell size={32} className="text-primary-600 flex-shrink-0 mt-1" />
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-ocean-700 mb-1">
+            <h3 className="text-lg font-bold text-primary-700 mb-1">
               Enable Notifications?
             </h3>
             <p className="text-sm text-gray-600 mb-4">
@@ -134,11 +134,11 @@ export function NotificationSettings() {
   }
 
   return (
-    <div className="flex items-center gap-3 p-4 bg-ocean-50 rounded-lg border border-ocean-200">
+    <div className="flex items-center gap-3 p-4 bg-primary-50 rounded-lg border border-primary-200">
       <IconBell
         size={24}
         className={
-          permission === "granted" ? "text-seaweed-600" : "text-gray-400"
+          permission === "granted" ? "text-success-600" : "text-gray-400"
         }
       />
       <div className="flex-1">

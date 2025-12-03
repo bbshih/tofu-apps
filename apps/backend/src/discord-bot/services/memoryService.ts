@@ -3,7 +3,7 @@
  * Handles post-event followups and memory collection
  */
 
-import { prisma, Poll, EventMemory, EventFollowup, MemoryType } from '../../seacalendar/prisma.js';
+import { prisma, Poll, EventMemory, EventFollowup, MemoryType } from '../../calendar/prisma.js';
 import { DateTime } from 'luxon';
 import * as googlePhotos from './googlePhotosService.js';
 

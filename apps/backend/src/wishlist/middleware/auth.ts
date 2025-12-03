@@ -11,11 +11,14 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   }
 
   try {
-    const secret = process.env.JWT_SECRET || 'default_secret';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET not configured');
+    }
     const decoded = jwt.verify(token, secret) as { id: number; email: string };
     (req as WishlistAuthRequest).user = decoded;
     next();
   } catch (_error) {
-    return res.status(403).json({ _error: 'Invalid or expired token' });
+    return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };

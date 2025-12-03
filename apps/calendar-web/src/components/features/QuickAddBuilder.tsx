@@ -91,7 +91,7 @@ export default function QuickAddBuilder({ onDatesSelected }: QuickAddBuilderProp
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <svg
-          className="w-5 h-5 text-coral-600"
+          className="w-5 h-5 text-accent-600"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -103,10 +103,10 @@ export default function QuickAddBuilder({ onDatesSelected }: QuickAddBuilderProp
             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
           />
         </svg>
-        <h3 className="font-semibold text-ocean-800">Quick Add</h3>
+        <h3 className="font-semibold text-primary-800">Quick Add</h3>
       </div>
 
-      <div className="p-4 rounded-lg border-2 border-coral-200 bg-white space-y-4">
+      <div className="p-4 rounded-lg border-2 border-accent-200 bg-white space-y-4">
         {/* Day Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Select Days</label>
@@ -118,8 +118,8 @@ export default function QuickAddBuilder({ onDatesSelected }: QuickAddBuilderProp
                 onClick={() => toggleDay(day)}
                 className={`px-3 py-2 rounded-lg border-2 font-medium text-sm transition-all duration-200 ${
                   checked
-                    ? 'bg-coral-500 border-coral-600 text-white shadow-md'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-coral-400 hover:bg-coral-50'
+                    ? 'bg-accent-500 border-accent-600 text-white shadow-md'
+                    : 'bg-white border-gray-300 text-gray-700 hover:border-accent-400 hover:bg-accent-50'
                 }`}
                 aria-pressed={checked}
               >
@@ -143,8 +143,8 @@ export default function QuickAddBuilder({ onDatesSelected }: QuickAddBuilderProp
                   onClick={() => setTimeRange(option.value)}
                   className={`px-3 py-2 rounded-lg border-2 font-medium text-sm transition-all duration-200 ${
                     isSelected
-                      ? 'bg-ocean-500 border-ocean-600 text-white shadow-md'
-                      : 'bg-white border-gray-300 text-gray-700 hover:border-ocean-400 hover:bg-ocean-50'
+                      ? 'bg-primary-500 border-primary-600 text-white shadow-md'
+                      : 'bg-white border-gray-300 text-gray-700 hover:border-primary-400 hover:bg-primary-50'
                   }`}
                   aria-pressed={isSelected}
                 >
@@ -156,7 +156,7 @@ export default function QuickAddBuilder({ onDatesSelected }: QuickAddBuilderProp
         </div>
 
         {/* Preview */}
-        <div className="bg-sand-100 p-3 rounded-lg border border-sand-300">
+        <div className="bg-light-100 p-3 rounded-lg border border-light-300">
           <p className="text-sm text-gray-700">
             <span className="font-medium">Preview:</span> {getPreviewText()}
           </p>

@@ -1,5 +1,5 @@
 /**
- * Browser notification utilities for SeaCalendar
+ * Browser notification utilities for Calendar
  */
 
 export type NotificationPermissionStatus = "granted" | "denied" | "default";

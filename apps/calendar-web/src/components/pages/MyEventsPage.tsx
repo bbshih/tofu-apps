@@ -10,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import Card from "../shared/Card";
 import Button from "../shared/Button";
 import CopyButton from "../shared/CopyButton";
+import { setMyEventsPageMeta } from "../../utils/metaTags";
 
 interface Poll {
   id: string;
@@ -28,6 +29,10 @@ export default function MyEventsPageDb() {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    setMyEventsPageMeta();
+  }, []);
 
   useEffect(() => {
     loadPolls();
@@ -66,13 +71,13 @@ export default function MyEventsPageDb() {
     switch (status) {
       case "VOTING":
         return (
-          <span className="px-2 py-1 bg-seaweed-100 text-seaweed-700 rounded text-xs font-medium">
+          <span className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs font-medium">
             Voting Open
           </span>
         );
       case "FINALIZED":
         return (
-          <span className="px-2 py-1 bg-ocean-100 text-ocean-700 rounded text-xs font-medium">
+          <span className="px-2 py-1 bg-primary-100 text-primary-700 rounded text-xs font-medium">
             <IconCheck size={14} className="inline mr-1" /> Finalized
           </span>
         );
@@ -84,7 +89,7 @@ export default function MyEventsPageDb() {
         );
       case "EXPIRED":
         return (
-          <span className="px-2 py-1 bg-coral-100 text-coral-700 rounded text-xs font-medium">
+          <span className="px-2 py-1 bg-accent-100 text-accent-700 rounded text-xs font-medium">
             Expired
           </span>
         );
@@ -114,7 +119,7 @@ export default function MyEventsPageDb() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sand-50 to-ocean-50 p-4 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-light-50 to-primary-50 p-4 flex items-center justify-center">
         <Card className="max-w-md w-full text-center">
           <p className="text-gray-600">Loading your events...</p>
         </Card>
@@ -123,13 +128,13 @@ export default function MyEventsPageDb() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-gradient-to-b from-ocean-50 to-ocean-100">
+    <div className="min-h-screen p-4 md:p-8 bg-gradient-to-b from-primary-50 to-primary-100">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 animate-slide-down">
           <div>
             <h1
-              className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-r from-ocean-600 via-coral-500 to-ocean-500 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_100%]"
+              className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-r from-primary-600 via-accent-500 to-primary-500 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_100%]"
               style={{
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -137,7 +142,7 @@ export default function MyEventsPageDb() {
             >
               <IconCalendar
                 size={40}
-                className="inline mr-2 text-ocean-600"
+                className="inline mr-2 text-primary-600"
                 style={{
                   WebkitTextFillColor: "#0e7490",
                 }}
@@ -167,10 +172,10 @@ export default function MyEventsPageDb() {
 
         {polls.length === 0 ? (
           <Card hover3d={false} className="text-center py-12 animate-fade-in">
-            <h2 className="text-2xl font-bold text-ocean-600 mb-2">
+            <h2 className="text-2xl font-bold text-primary-600 mb-2">
               No Events Yet
             </h2>
-            <p className="text-ocean-500 mb-4">
+            <p className="text-primary-500 mb-4">
               Create your first event here on the web or via Discord!
             </p>
             <Button
@@ -201,7 +206,7 @@ export default function MyEventsPageDb() {
                     {/* Event Title and Status */}
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-ocean-700 mb-1">
+                        <h3 className="text-xl font-bold text-primary-700 mb-1">
                           {poll.title}
                         </h3>
                         {poll.description && (
@@ -229,7 +234,7 @@ export default function MyEventsPageDb() {
                           type="text"
                           value={votingUrl}
                           readOnly
-                          className="flex-1 px-4 py-2 border-2 border-ocean-200 rounded-lg bg-ocean-50 text-sm font-mono"
+                          className="flex-1 px-4 py-2 border-2 border-primary-200 rounded-lg bg-primary-50 text-sm font-mono"
                         />
                         <CopyButton
                           textToCopy={votingUrl}
@@ -250,7 +255,7 @@ export default function MyEventsPageDb() {
                           type="text"
                           value={resultsUrl}
                           readOnly
-                          className="flex-1 px-4 py-2 border-2 border-coral-200 rounded-lg bg-sand-100 text-sm font-mono"
+                          className="flex-1 px-4 py-2 border-2 border-accent-200 rounded-lg bg-light-100 text-sm font-mono"
                         />
                         <Button
                           variant="primary"

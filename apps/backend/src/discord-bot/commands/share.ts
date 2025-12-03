@@ -13,7 +13,7 @@ import {
 } from 'discord.js';
 import { getPollWithDetails, generateVotingUrl } from '../services/pollService.js';
 import { Config } from '../config.js';
-import { prisma } from '../../seacalendar/prisma.js';
+import { prisma } from '../../calendar/prisma.js';
 
 export const data = new SlashCommandBuilder()
   .setName('share')

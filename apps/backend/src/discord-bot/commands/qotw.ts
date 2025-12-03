@@ -884,7 +884,7 @@ export async function postQuestion(guildId: string, channel: TextChannel): Promi
     // No questions available - post default and request more
     const defaultQuestion = qotwService.getDefaultQuestion();
     await channel.send({
-      content: `**QUESTION OF THE WEEK** \n\n${defaultQuestion}\n\n_Submitted by SeaCalendar Bot_\n\n⚠️ **We're out of questions!** Submit yours with \`/qotw submit\``,
+      content: `**QUESTION OF THE WEEK** \n\n${defaultQuestion}\n\n_Submitted by TofuBot Bot_\n\n⚠️ **We're out of questions!** Submit yours with \`/qotw submit\``,
     });
     return;
   }

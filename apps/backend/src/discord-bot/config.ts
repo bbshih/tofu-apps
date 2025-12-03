@@ -1,5 +1,5 @@
 /**
- * Configuration for SeaCalendar Discord Bot
+ * Configuration for TofuBot Discord Bot
  * Loads and validates environment variables
  */
 
@@ -66,7 +66,7 @@ try {
 } catch (_error) {
   if (_error instanceof z.ZodError) {
     console.error('❌ Invalid environment variables:');
-    _error.errors.forEach((err) => {
+    _error.issues.forEach((err) => {
       console.error(`  - ${err.path.join('.')}: ${err.message}`);
     });
     process.exit(1);

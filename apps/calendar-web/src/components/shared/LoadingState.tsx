@@ -6,7 +6,7 @@ interface LoadingStateProps {
 }
 
 /**
- * Reusable loading state component with ocean-themed spinner
+ * Reusable loading state component with primary-themed spinner
  * Used across multiple pages to show loading state
  */
 export default function LoadingState({
@@ -20,13 +20,13 @@ export default function LoadingState({
   };
 
   return (
-      <div className="min-h-screen p-4 md:p-8 flex items-center justify-center bg-gradient-to-b from-ocean-50 to-ocean-100">
+      <div className="min-h-screen p-4 md:p-8 flex items-center justify-center bg-gradient-to-b from-primary-50 to-primary-100">
         <Card>
           <div className="text-center py-8">
             <div
-              className={`animate-spin rounded-full border-b-2 border-ocean-500 mx-auto mb-4 ${sizeClasses[size]}`}
+              className={`animate-spin rounded-full border-b-2 border-primary-500 mx-auto mb-4 ${sizeClasses[size]}`}
             ></div>
-            <p className="text-ocean-700">{message}</p>
+            <p className="text-primary-700">{message}</p>
           </div>
         </Card>
       </div>

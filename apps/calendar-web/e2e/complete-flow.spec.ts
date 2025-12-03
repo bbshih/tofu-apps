@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Complete E2E flow test for SeaCalendar
+ * Complete E2E flow test for Calendar
  * Tests the entire workflow from event creation to calendar download
  *
  * This test uses route interception to mock GitHub Gist API calls
@@ -21,11 +21,11 @@ const createMockGist = (eventData: any) => ({
       content: JSON.stringify(eventData), // In real app this would be encrypted
     },
   },
-  description: `SeaCalendar Event: ${eventData.title}`,
+  description: `Calendar Event: ${eventData.title}`,
   public: false,
 });
 
-test.describe('SeaCalendar Complete Flow', () => {
+test.describe('Calendar Complete Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Set up a mock GitHub token in localStorage
     await page.goto('/');
@@ -39,7 +39,7 @@ test.describe('SeaCalendar Complete Flow', () => {
 
     // Step 1: Navigate to create page
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /SeaCalendar/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Calendar/i })).toBeVisible();
 
     // Click create event button
     await page.click('text=Create Event');

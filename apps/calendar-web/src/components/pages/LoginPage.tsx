@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Card from '../shared/Card';
 import Button from '../shared/Button';
+import { setLoginPageMeta } from '../../utils/metaTags';
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -10,6 +11,10 @@ export default function LoginPage() {
   const location = useLocation();
 
   const from = (location.state as any)?.from?.pathname || '/';
+
+  useEffect(() => {
+    setLoginPageMeta();
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -22,12 +27,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand-50 to-ocean-50 p-4 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-light-50 to-primary-50 p-4 flex items-center justify-center">
       <div className="max-w-md mx-auto w-full">
         <Card>
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-ocean-600 mb-2">
-              Welcome to SeaCalendar
+            <h1 className="text-3xl font-bold text-primary-600 mb-2">
+              Welcome to Calendar
             </h1>
             <p className="text-gray-600">
               Sign in to manage your events and vote

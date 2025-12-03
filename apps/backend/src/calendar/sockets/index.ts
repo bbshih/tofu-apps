@@ -12,7 +12,36 @@ import { prisma } from '../prisma.js';
 interface AuthenticatedSocket extends Socket {
   userId?: string;
   username?: string;
+  connectionCount?: number;
 }
+
+// Rate limiting for socket connections
+const connectionCounts = new Map<string, { count: number; resetAt: number }>();
+const MAX_CONNECTIONS_PER_MINUTE = 10;
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+
+/**
+ * Rate limit middleware for socket connections
+ */
+const socketRateLimiter = (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
+  const ip = socket.handshake.address;
+  const now = Date.now();
+
+  const record = connectionCounts.get(ip);
+
+  if (!record || now > record.resetAt) {
+    connectionCounts.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    return next();
+  }
+
+  if (record.count >= MAX_CONNECTIONS_PER_MINUTE) {
+    logger.warn('Socket connection rate limit exceeded', { ip, socketId: socket.id });
+    return next(new Error('Too many connection attempts'));
+  }
+
+  record.count++;
+  next();
+};
 
 /**
  * Authenticate socket connection
@@ -37,7 +66,7 @@ const authenticateSocket = async (socket: AuthenticatedSocket, next: (err?: Erro
 
     next();
   } catch (_error) {
-    logger.warn('Socket authentication failed', { _error, socketId: socket.id });
+    logger.warn('Socket authentication failed', { error: (_error as Error).message, socketId: socket.id });
     next(new Error('Invalid token'));
   }
 };
@@ -46,7 +75,8 @@ const authenticateSocket = async (socket: AuthenticatedSocket, next: (err?: Erro
  * Initialize Socket.io event handlers
  */
 export const initializeSocketHandlers = (io: SocketIOServer) => {
-  // Authentication middleware
+  // Apply rate limiting and authentication middleware
+  io.use(socketRateLimiter);
   io.use(authenticateSocket);
 
   io.on('connection', (socket: AuthenticatedSocket) => {
@@ -57,6 +87,13 @@ export const initializeSocketHandlers = (io: SocketIOServer) => {
      */
     socket.on('poll:subscribe', async (pollId: string) => {
       try {
+        // Validate UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(pollId)) {
+          socket.emit('error', { message: 'Invalid poll ID format' });
+          return;
+        }
+
         // Verify poll exists and user has access
         const poll = await prisma.poll.findUnique({
           where: { id: pollId },
@@ -68,7 +105,7 @@ export const initializeSocketHandlers = (io: SocketIOServer) => {
         });
 
         if (!poll) {
-          socket.emit('_error', { message: 'Poll not found' });
+          socket.emit('error', { message: 'Poll not found' });
           return;
         }
 
@@ -79,7 +116,7 @@ export const initializeSocketHandlers = (io: SocketIOServer) => {
         if (!isCreator && !isInvited && poll.guildId) {
           // For guild polls, allow anyone (Discord bot will handle permissions)
         } else if (!isCreator && !isInvited) {
-          socket.emit('_error', { message: 'Access denied' });
+          socket.emit('error', { message: 'Access denied' });
           return;
         }
 
@@ -89,8 +126,8 @@ export const initializeSocketHandlers = (io: SocketIOServer) => {
 
         socket.emit('poll:subscribed', { pollId });
       } catch (_error) {
-        logger.error('Failed to subscribe to poll', { _error, pollId, userId: socket.userId });
-        socket.emit('_error', { message: 'Failed to subscribe to poll' });
+        logger.error('Failed to subscribe to poll', { error: (_error as Error).message, pollId, userId: socket.userId });
+        socket.emit('error', { message: 'Failed to subscribe to poll' });
       }
     });
 

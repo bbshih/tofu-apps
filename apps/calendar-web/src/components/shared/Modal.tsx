@@ -65,8 +65,8 @@ export default function Modal({
         className={`relative bg-white rounded-2xl shadow-2xl ${sizeStyles[size]} w-full max-h-[90vh] overflow-y-auto`}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b-2 border-ocean-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-2xl font-bold text-ocean-600">{title}</h2>
+        <div className="sticky top-0 bg-white border-b-2 border-primary-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <h2 className="text-2xl font-bold text-primary-600">{title}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer"
@@ -93,7 +93,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="sticky bottom-0 bg-white border-t-2 border-ocean-100 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+          <div className="sticky bottom-0 bg-white border-t-2 border-primary-100 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
             {footer}
           </div>
         )}

@@ -16,7 +16,7 @@ import {
   parseEventDescriptionSmart,
   validateParsedEvent,
   formatDateOption,
-} from '@seacalendar/shared';
+} from '../../calendar/shared/dist/index.js';
 import {
   createEventPoll,
   generateVotingUrl,

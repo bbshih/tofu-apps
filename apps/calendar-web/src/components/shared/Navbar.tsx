@@ -13,12 +13,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-ocean-600 shadow-lg">
+    <nav className="bg-primary-600 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-black text-white">SeaCalendar</span>
+            <span className="text-2xl font-black text-white">Calendar</span>
           </Link>
 
           {/* Navigation Links */}
@@ -58,11 +58,11 @@ export default function Navbar() {
                     <p className="text-sm font-medium text-white">
                       {user?.username}
                       {user?.discriminator && user.discriminator !== '0' && (
-                        <span className="text-ocean-200">#{user.discriminator}</span>
+                        <span className="text-primary-200">#{user.discriminator}</span>
                       )}
                     </p>
                     {user?.email && (
-                      <p className="text-xs text-ocean-200">{user.email}</p>
+                      <p className="text-xs text-primary-200">{user.email}</p>
                     )}
                   </div>
                 </div>

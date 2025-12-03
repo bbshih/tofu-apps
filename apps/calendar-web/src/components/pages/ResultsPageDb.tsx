@@ -217,14 +217,14 @@ export default function ResultsPageDb() {
     isCreator && (poll.status === "FINALIZED" || poll.status === "CANCELLED");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand-50 to-ocean-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-light-50 to-primary-50 p-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <Card className="mb-6">
           <div className="flex items-start gap-4">
-            <IconChartBar size={48} className="text-ocean-600 flex-shrink-0" />
+            <IconChartBar size={48} className="text-primary-600 flex-shrink-0" />
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-ocean-600 mb-2">
+              <h1 className="text-2xl font-bold text-primary-600 mb-2">
                 {poll.title}
               </h1>
               {poll.description && (
@@ -234,15 +234,15 @@ export default function ResultsPageDb() {
                 Created by {poll.creatorName}
               </p>
               <div className="mt-3 flex items-center gap-4 text-sm">
-                <span className="text-seaweed-600 font-medium">
+                <span className="text-success-600 font-medium">
                   {results.totalVoters}{" "}
                   {results.totalVoters === 1 ? "vote" : "votes"}
                 </span>
                 {poll.status === "VOTING" && (
-                  <span className="text-coral-500">Voting open</span>
+                  <span className="text-accent-500">Voting open</span>
                 )}
                 {poll.status === "FINALIZED" && (
-                  <span className="text-ocean-600">
+                  <span className="text-primary-600">
                     <IconCheck size={16} className="inline mr-1" /> Finalized
                   </span>
                 )}
@@ -253,17 +253,17 @@ export default function ResultsPageDb() {
 
         {/* Winner card (if votes exist) */}
         {results.totalVoters > 0 && topOption && (
-          <Card className="mb-6 bg-gradient-to-br from-seaweed-50 to-ocean-50 border-2 border-seaweed-300">
+          <Card className="mb-6 bg-gradient-to-br from-success-50 to-primary-50 border-2 border-success-300">
             <div className="flex items-center gap-3 mb-3">
-              <IconTrophy size={32} className="text-seaweed-700" />
-              <h2 className="text-xl font-bold text-seaweed-700">Top Choice</h2>
+              <IconTrophy size={32} className="text-success-700" />
+              <h2 className="text-xl font-bold text-success-700">Top Choice</h2>
             </div>
             <div className="bg-white rounded-lg p-4">
               <div className="font-semibold text-lg text-gray-800 mb-1">
                 {topOption.label}
               </div>
               <div className="flex items-center gap-4 text-sm">
-                <span className="text-seaweed-600 font-medium">
+                <span className="text-success-600 font-medium">
                   <IconCheck size={16} className="inline mr-1" />{" "}
                   {topOption.availableCount} available (
                   {topOption.availablePercentage.toFixed(0)}%)
@@ -301,7 +301,7 @@ export default function ResultsPageDb() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-semibold text-seaweed-600">
+                      <div className="text-sm font-semibold text-success-600">
                         {result.availableCount}{" "}
                         <IconCheck size={16} className="inline" />
                       </div>
@@ -312,7 +312,7 @@ export default function ResultsPageDb() {
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-seaweed-500 h-full transition-all duration-300"
+                        className="bg-success-500 h-full transition-all duration-300"
                         style={{ width: `${result.availablePercentage}%` }}
                       />
                     </div>
@@ -379,8 +379,8 @@ export default function ResultsPageDb() {
                         onClick={() => toggleOption(option.id)}
                         className={`w-full p-3 rounded-lg border-2 transition-all text-left cursor-pointer ${
                           isSelected
-                            ? "border-seaweed-500 bg-seaweed-50"
-                            : "border-gray-200 hover:border-ocean-300"
+                            ? "border-success-500 bg-success-50"
+                            : "border-gray-200 hover:border-primary-300"
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -399,7 +399,7 @@ export default function ResultsPageDb() {
                             {isSelected ? (
                               <IconCheck
                                 size={24}
-                                className="text-seaweed-600"
+                                className="text-success-600"
                               />
                             ) : (
                               <IconSquare size={24} className="text-gray-400" />

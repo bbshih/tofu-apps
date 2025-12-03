@@ -44,14 +44,14 @@ const CalendarDay = memo(function CalendarDay({
         aspect-square ${padding} rounded-lg transition-all
         flex items-center justify-center
         ${fontSize} font-medium
-        ${isToday ? 'ring-2 ring-coral-400 ring-offset-1' : ''}
+        ${isToday ? 'ring-2 ring-accent-400 ring-offset-1' : ''}
         ${isPast
           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
           : isSelected
-          ? 'bg-ocean-500 text-white hover:bg-ocean-600 shadow-md'
+          ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-md'
           : isWeekend
-          ? 'bg-sand-50 text-ocean-700 hover:bg-sand-100'
-          : 'bg-white text-gray-600 hover:bg-ocean-50 hover:text-ocean-700'
+          ? 'bg-light-50 text-primary-700 hover:bg-light-100'
+          : 'bg-white text-gray-600 hover:bg-primary-50 hover:text-primary-700'
         }
       `}
       aria-label={`${formatDateLabel(isoDate)}${isSelected ? ' (selected)' : ''}`}
@@ -230,16 +230,16 @@ function CalendarMonthView({
   };
 
   return (
-    <div className="bg-white rounded-xl border-2 border-ocean-200 overflow-hidden">
+    <div className="bg-white rounded-xl border-2 border-primary-200 overflow-hidden">
       {/* Header with navigation */}
-      <div className="bg-ocean-100 px-4 py-3 flex items-center justify-between border-b-2 border-ocean-200">
+      <div className="bg-primary-100 px-4 py-3 flex items-center justify-between border-b-2 border-primary-200">
         <div className="flex items-center gap-1">
           <button
             onClick={goToPreviousMonth}
             disabled={!canGoPrevious}
             className={`p-2 rounded-lg transition-colors ${
               canGoPrevious
-                ? 'hover:bg-ocean-200 cursor-pointer'
+                ? 'hover:bg-primary-200 cursor-pointer'
                 : 'opacity-40 cursor-not-allowed'
             }`}
             aria-label="Previous month"
@@ -247,8 +247,8 @@ function CalendarMonthView({
             <svg
               className={`w-5 h-5 transition-all duration-500 ${
                 hasSelectionsBefore
-                  ? 'text-coral-500 animate-pulse drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]'
-                  : 'text-ocean-700'
+                  ? 'text-accent-500 animate-pulse drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]'
+                  : 'text-primary-700'
               }`}
               fill="none"
               stroke="currentColor"
@@ -260,12 +260,12 @@ function CalendarMonthView({
         </div>
 
         <div className="flex items-center gap-3">
-          <h3 className={`${fontSizeClasses.monthTitle} font-bold text-ocean-800`}>
+          <h3 className={`${fontSizeClasses.monthTitle} font-bold text-primary-800`}>
             {monthsToShow === 1 ? monthYearDisplay : `${monthsToShow} Months`}
           </h3>
           <button
             onClick={goToToday}
-            className="px-3 py-1 text-sm bg-ocean-500 text-white rounded-lg hover:bg-ocean-600 transition-colors cursor-pointer"
+            className="px-3 py-1 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors cursor-pointer"
           >
             Today
           </button>
@@ -274,14 +274,14 @@ function CalendarMonthView({
         <div className="flex items-center gap-1">
           <button
             onClick={goToNextMonth}
-            className="p-2 hover:bg-ocean-200 rounded-lg transition-colors cursor-pointer"
+            className="p-2 hover:bg-primary-200 rounded-lg transition-colors cursor-pointer"
             aria-label="Next month"
           >
             <svg
               className={`w-5 h-5 transition-all duration-500 ${
                 hasSelectionsAfter
-                  ? 'text-coral-500 animate-pulse drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]'
-                  : 'text-ocean-700'
+                  ? 'text-accent-500 animate-pulse drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]'
+                  : 'text-primary-700'
               }`}
               fill="none"
               stroke="currentColor"
@@ -306,7 +306,7 @@ function CalendarMonthView({
             <div key={monthIndex} className="space-y-2">
               {/* Month title (only show for multi-month view) */}
               {monthsToShow > 1 && (
-                <h4 className={`${fontSizeClasses.monthTitle} font-semibold text-ocean-700 text-center`}>
+                <h4 className={`${fontSizeClasses.monthTitle} font-semibold text-primary-700 text-center`}>
                   {monthData.monthName}
                 </h4>
               )}
@@ -316,7 +316,7 @@ function CalendarMonthView({
                 {dayNames.map((day) => (
                   <div
                     key={day}
-                    className={`text-center ${fontSizeClasses.dayHeader} font-semibold text-ocean-600 py-1`}
+                    className={`text-center ${fontSizeClasses.dayHeader} font-semibold text-primary-600 py-1`}
                   >
                     {day}
                   </div>

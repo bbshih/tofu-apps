@@ -4,7 +4,7 @@
  */
 
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import { prisma } from '../../seacalendar/prisma.js';
+import { prisma } from '../../calendar/prisma.js';
 import * as googlePhotos from '../services/googlePhotosService.js';
 import { DateTime } from 'luxon';
 

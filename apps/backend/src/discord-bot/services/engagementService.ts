@@ -3,7 +3,7 @@
  * Tracks user engagement for friendship health monitoring
  */
 
-import { prisma } from '../../seacalendar/prisma.js';
+import { prisma } from '../../calendar/prisma.js';
 import { DateTime } from 'luxon';
 
 export interface UserEngagement {

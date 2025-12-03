@@ -11,8 +11,16 @@ export const register = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  if (password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  // Strengthen password requirements
+  if (password.length < 12) {
+    return res.status(400).json({ error: 'Password must be at least 12 characters' });
+  }
+
+  // Check for basic complexity
+  if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return res.status(400).json({
+      error: 'Password must contain at least one lowercase letter, one uppercase letter, and one number'
+    });
   }
 
   try {
@@ -35,10 +43,14 @@ export const register = async (req: Request, res: Response) => {
     const user = result.rows[0];
 
     // Generate JWT
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET not configured');
+    }
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET || 'default_secret',
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as any
+      secret,
+      { expiresIn: '7d' }
     );
 
     res.status(201).json({
@@ -71,14 +83,18 @@ export const login = async (req: Request, res: Response) => {
     // Verify password
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword) {
-      return res.status(401).json({ _error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Generate JWT
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET not configured');
+    }
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET || 'default_secret',
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as any
+      secret,
+      { expiresIn: '7d' }
     );
 
     res.json({

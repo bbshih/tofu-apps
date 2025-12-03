@@ -5,7 +5,7 @@
 
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { createMemory, getEventMemories } from '../services/memoryService.js';
-import { prisma } from '../../seacalendar/prisma.js';
+import { prisma } from '../../calendar/prisma.js';
 
 export const data = new SlashCommandBuilder()
   .setName('memory')

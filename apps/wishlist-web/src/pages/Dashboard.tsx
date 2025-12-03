@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { wishlistsApi } from '../api/wishlists';
 import { useAuth } from '../hooks/useAuth';
+import { setDashboardPageTitle } from '../utils/metaTags';
 
 export default function Dashboard() {
+  useEffect(() => {
+    setDashboardPageTitle();
+  }, []);
   const [newListName, setNewListName] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const queryClient = useQueryClient();

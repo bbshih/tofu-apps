@@ -9,7 +9,7 @@ import {
   parseDateFromNaturalLanguage,
   parseEventDescriptionSmart,
   parseEventDescriptionAdvanced,
-} from '@seacalendar/shared';
+} from '../shared/dist/index.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { llmParsingLimiter } from '../middleware/rateLimit.js';
 import { validateDateInput } from '../middleware/inputValidation.js';

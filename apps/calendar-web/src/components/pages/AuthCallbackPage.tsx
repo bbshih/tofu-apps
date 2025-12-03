@@ -1,10 +1,15 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Card from '../shared/Card';
+import { setAuthCallbackPageMeta } from '../../utils/metaTags';
 
 export default function AuthCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setAuthCallbackPageMeta();
+  }, []);
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -26,7 +31,7 @@ export default function AuthCallbackPage() {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand-50 to-ocean-50 p-4 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-light-50 to-primary-50 p-4 flex items-center justify-center">
       <Card className="max-w-md w-full text-center">
         <p className="text-gray-600">Completing sign in...</p>
       </Card>

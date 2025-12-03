@@ -16,7 +16,7 @@
 
     /* Path mapping */
     "paths": {
-      "@seacalendar/shared": ["../backend/src/seacalendar/shared/dist"]
+      "@seacalendar/shared": ["../backend/src/calendar/shared/dist"]
     },
 
     /* Linting */
