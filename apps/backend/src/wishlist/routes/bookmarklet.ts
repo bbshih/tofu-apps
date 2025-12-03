@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { authenticateToken } from '../middleware/auth.js';
 import {
@@ -18,11 +19,18 @@ const bookmarkletLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// CORS middleware for public bookmarklet endpoints (allow any origin)
+const bookmarkletCors = cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+});
+
 // Generate/regenerate bookmarklet token (requires authentication)
 router.post('/generate-token', authenticateToken, generateBookmarkletToken);
 
-// Public endpoints for bookmarklet (token-based auth)
-router.get('/wishlists', bookmarkletLimiter, getWishlistsByToken);
-router.post('/add-item', bookmarkletLimiter, addItemViaBookmarklet);
+// Public endpoints for bookmarklet (token-based auth, allow any origin)
+router.get('/wishlists', bookmarkletCors, bookmarkletLimiter, getWishlistsByToken);
+router.post('/add-item', bookmarkletCors, bookmarkletLimiter, addItemViaBookmarklet);
 
 export default router;

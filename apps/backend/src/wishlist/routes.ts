@@ -29,7 +29,7 @@ const imageLimiter = rateLimit({
   max: 60, // 60 requests per minute
 });
 
-router.use('/uploads', imageLimiter, authenticateToken, (req, res, next) => {
+router.use('/uploads', imageLimiter, (req, res, next) => {
   // Validate filename to prevent path traversal
   const filename = path.basename(req.path);
   if (!/^[a-f0-9]{32}\.jpg$/.test(filename)) {
@@ -39,7 +39,7 @@ router.use('/uploads', imageLimiter, authenticateToken, (req, res, next) => {
   // Set security headers
   res.set({
     'X-Content-Type-Options': 'nosniff',
-    'Cache-Control': 'private, max-age=3600',
+    'Cache-Control': 'public, max-age=86400', // 24 hours for public images
   });
 
   express.static(uploadDir, {

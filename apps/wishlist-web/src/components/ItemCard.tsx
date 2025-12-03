@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Item } from '../types';
 
 interface ItemCardProps {
@@ -6,6 +7,8 @@ interface ItemCardProps {
 }
 
 export default function ItemCard({ item, onDelete }: ItemCardProps) {
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const imageUrl = item.image_path
     ? `/api/wishlist/uploads/${item.image_path}`
     : null;
@@ -18,6 +21,10 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
   const discountPercent = hasDiscount
     ? Math.round(((price - salePrice) / price) * 100)
     : 0;
+
+  const handleConfirmDelete = () => {
+    onDelete();
+  };
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
@@ -105,22 +112,39 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
           </p>
         )}
 
-        <div className="flex gap-2">
-          <a
-            href={item.original_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 text-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-          >
-            View Product
-          </a>
-          <button
-            onClick={onDelete}
-            className="px-3 py-2 bg-red-50 text-red-600 text-sm rounded-md hover:bg-red-100"
-          >
-            Remove
-          </button>
-        </div>
+        {showConfirm ? (
+          <div className="flex gap-2">
+            <button
+              onClick={handleConfirmDelete}
+              className="flex-1 px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
+            >
+              Remove
+            </button>
+            <button
+              onClick={() => setShowConfirm(false)}
+              className="flex-1 px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <a
+              href={item.original_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 text-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+            >
+              View Product
+            </a>
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="px-3 py-2 bg-red-50 text-red-600 text-sm rounded-md hover:bg-red-100"
+            >
+              Remove
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { AuthResponse } from '../types';
 
 export const authApi = {
   register: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/wishlist/auth/register', {
+    const response = await apiClient.post<AuthResponse>('/auth/register', {
       email,
       password,
     });
@@ -11,7 +11,7 @@ export const authApi = {
   },
 
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/wishlist/auth/login', {
+    const response = await apiClient.post<AuthResponse>('/auth/login', {
       email,
       password,
     });

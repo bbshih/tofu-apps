@@ -6,7 +6,7 @@ import { downloadAndSaveImage } from '../utils/imageDownloader.js';
 
 export const createItem = async (req: WishlistAuthRequest, res: Response) => {
   try {
-    const { wishlist_id, url, product_name, brand, price, sale_price, currency, notes, tags } =
+    const { wishlist_id, url, product_name, brand, price, sale_price, currency, notes, tags, force_add } =
       req.body;
 
     const userId = req.user?.id;
@@ -33,9 +33,10 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
       currency: currency || 'USD',
       site_name: null,
       image_path: null,
+      image_url: null,
     };
 
-    // If not all data provided, scrape it
+    // If not all data provided, scrape it first (before duplicate check)
     if (!product_name) {
       try {
         const scrapedData = await scrapeProduct(url);
@@ -47,20 +48,66 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
           currency: scrapedData.currency || 'USD',
           site_name: scrapedData.site_name,
           image_path: null,
+          image_url: scrapedData.image_url, // Keep temp URL for duplicate comparison
         };
-
-        // Download and save image
-        if (scrapedData.image_url) {
-          const savedImagePath = await downloadAndSaveImage(scrapedData.image_url);
-          if (savedImagePath) {
-            itemData.image_path = savedImagePath;
-          }
-        }
       } catch (_error) {
         console.error('Scraping failed:', _error);
         return res.status(400).json({
           _error: 'Failed to scrape product. Please provide product details manually.',
         });
+      }
+    }
+
+    // Skip duplicate check if force_add is true
+    if (!force_add) {
+      // Check for exact URL match
+      const exactMatch = await query(
+        'SELECT id, product_name, brand, price, sale_price, currency, image_path, original_url FROM items WHERE wishlist_id = $1 AND original_url = $2',
+        [wishlist_id, url]
+      );
+
+      if (exactMatch.rows.length > 0) {
+        return res.status(409).json({
+          error: 'This item is already in your wishlist',
+          duplicates: exactMatch.rows,
+          duplicate_type: 'exact',
+          new_item: itemData, // Send scraped data for comparison
+        });
+      }
+
+      // Check for similar URLs (same domain and path, different query strings)
+      // Extract base URL without query string
+      let baseUrl: string;
+      try {
+        const urlObj = new URL(url);
+        baseUrl = `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}`;
+      } catch {
+        baseUrl = url;
+      }
+
+      const similarUrlCheck = await query(
+        `SELECT id, product_name, brand, price, sale_price, currency, image_path, original_url
+         FROM items
+         WHERE wishlist_id = $1
+         AND original_url LIKE $2`,
+        [wishlist_id, `${baseUrl}%`]
+      );
+
+      if (similarUrlCheck.rows.length > 0) {
+        return res.status(409).json({
+          error: 'Similar item(s) found in your wishlist',
+          duplicates: similarUrlCheck.rows,
+          duplicate_type: 'similar_url',
+          new_item: itemData, // Send scraped data for comparison
+        });
+      }
+    }
+
+    // Download and save image
+    if (itemData.image_url) {
+      const savedImagePath = await downloadAndSaveImage(itemData.image_url);
+      if (savedImagePath) {
+        itemData.image_path = savedImagePath;
       }
     }
 

@@ -5,7 +5,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { URL } from 'url';
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
+const UPLOAD_DIR = process.env.WISHLIST_UPLOAD_DIR || './uploads';
 const MAX_IMAGE_SIZE = parseInt(process.env.MAX_IMAGE_SIZE || '5242880'); // 5MB default
 
 // Allowed protocols and blocked hosts for SSRF prevention

@@ -36,10 +36,8 @@ export default function WishlistDetail() {
     },
   });
 
-  const handleDeleteItem = (itemId: number, productName: string) => {
-    if (confirm(`Remove "${productName}" from wishlist?`)) {
-      deleteMutation.mutate(itemId);
-    }
+  const handleDeleteItem = (itemId: number) => {
+    deleteMutation.mutate(itemId);
   };
 
   return (
@@ -79,7 +77,7 @@ export default function WishlistDetail() {
                 <ItemCard
                   key={item.id}
                   item={item}
-                  onDelete={() => handleDeleteItem(item.id, item.product_name)}
+                  onDelete={() => handleDeleteItem(item.id)}
                 />
               ))}
             </div>

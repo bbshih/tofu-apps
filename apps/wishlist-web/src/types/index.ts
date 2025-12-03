@@ -49,6 +49,7 @@ export interface CreateItemRequest {
   currency?: string;
   notes?: string;
   tags?: string[];
+  force_add?: boolean;
 }
 
 export interface UpdateItemRequest {

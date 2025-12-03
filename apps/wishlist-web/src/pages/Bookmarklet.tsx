@@ -24,7 +24,7 @@ export default function Bookmarklet() {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.post('/wishlist/bookmarklet/generate-token');
+      const response = await apiClient.post('/bookmarklet/generate-token');
       setTokenData(response.data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to generate token');
@@ -123,13 +123,25 @@ export default function Bookmarklet() {
 
                 <div className="bg-gray-50 p-4 rounded-md mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Bookmarklet (drag to bookmarks bar):
+                    Your Bookmarklet:
                   </label>
+                  <p className="text-xs text-gray-600 mb-3">
+                    <strong>Important:</strong> Drag this button to your bookmarks bar (do not click it here)
+                  </p>
                   <div className="flex items-center gap-2">
                     <a
                       href={bookmarkletUrl}
-                      className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 cursor-move"
-                      onClick={(e) => e.preventDefault()}
+                      className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 cursor-move select-none"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        alert('Please drag this button to your bookmarks bar instead of clicking it.');
+                      }}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/uri-list', bookmarkletUrl);
+                        e.dataTransfer.setData('text/plain', '➕ Add to Wishlist');
+                        e.dataTransfer.effectAllowed = 'copy';
+                      }}
+                      title="Add to Wishlist"
                     >
                       ➕ Add to Wishlist
                     </a>
@@ -140,6 +152,9 @@ export default function Bookmarklet() {
                       {copySuccess ? '✓ Copied!' : 'Copy Code'}
                     </button>
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Can't drag? Use "Copy Code" and manually create a bookmark with the copied code.
+                  </p>
                 </div>
 
                 <button
