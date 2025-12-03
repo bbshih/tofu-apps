@@ -58,16 +58,13 @@ rsync -avz apps/backend/dist/ deploy@100.76.160.26:/opt/tofu-apps/apps/backend/d
 ssh deploy@100.76.160.26 'pm2 restart unified-backend'
 ```
 
-### 4. Clear CDN Cache
+### 4. Verify Deployment
 
-After deployment, purge Cloudflare cache:
-1. Go to Cloudflare Dashboard
-2. Navigate to **Caching** → **Configuration**
-3. Click **Purge Everything**
-
-Or purge specific URLs:
+After deployment, test the applications:
 - `https://wishlist.billyeatstofu.com/`
 - `https://cal.billyeatstofu.com/`
+
+**Note**: Cloudflare cache purging is no longer necessary as cache headers ensure immediate updates.
 
 ## Environment Variables
 
@@ -120,12 +117,12 @@ The server implements smart caching headers:
 
 ### Site shows old version after deployment
 
-1. **Check Cloudflare cache**: Purge Cloudflare cache (see step 4 above)
-2. **Hard refresh browser**: Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)
-3. **Verify correct files on server**:
+1. **Hard refresh browser**: Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)
+2. **Verify correct files on server**:
    ```bash
    ssh deploy@100.76.160.26 'cat /opt/tofu-apps/apps/backend/public/wishlist/index.html'
    ```
+3. **Check build artifacts**: Ensure the local build has the latest changes before deploying
 
 ### API calls hitting localhost
 
@@ -146,8 +143,7 @@ The PM2 process runs from `/opt/tofu-apps/`.
 
 - [ ] Built with production environment variables
 - [ ] Deployed to `/opt/tofu-apps/` (correct location)
-- [ ] Restarted PM2 process
-- [ ] Purged Cloudflare cache
+- [ ] Restarted PM2 process (if backend changed)
 - [ ] Verified in browser (hard refresh)
 - [ ] Checked API calls are hitting production endpoints
 

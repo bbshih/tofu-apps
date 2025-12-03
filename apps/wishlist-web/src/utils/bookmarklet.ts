@@ -98,7 +98,7 @@ export const generateBookmarkletScript = (apiUrl: string, token: string): string
           if (result.error) {
             throw new Error(result.error);
           }
-          statusMsg.textContent = '✓ Item added successfully!';
+          statusMsg.textContent = '✓ Item added!';
           statusMsg.style.color = '#10b981';
           setTimeout(() => overlay.remove(), 1500);
         })

@@ -1,24 +1,26 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { itemsApi } from '../api/items';
 import { tagsApi } from '../api/tags';
 import { wishlistsApi } from '../api/wishlists';
+import { Item } from '../types';
 
-interface AddItemModalProps {
-  wishlistId: number;
+interface EditItemModalProps {
+  item: Item;
   onClose: () => void;
 }
 
-export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps) {
-  const [url, setUrl] = useState('');
-  const [brand, setBrand] = useState('');
-  const [notes, setNotes] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+export default function EditItemModal({ item, onClose }: EditItemModalProps) {
+  const [productName, setProductName] = useState(item.product_name);
+  const [brand, setBrand] = useState(item.brand || '');
+  const [price, setPrice] = useState(item.price?.toString() || '');
+  const [salePrice, setSalePrice] = useState(item.sale_price?.toString() || '');
+  const [notes, setNotes] = useState(item.notes || '');
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    item.tags?.map(tag => tag.name) || []
+  );
   const [newTag, setNewTag] = useState('');
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
-  const [duplicates, setDuplicates] = useState<any[]>([]);
-  const [duplicateType, setDuplicateType] = useState<string>('');
-  const [newItemData, setNewItemData] = useState<any>(null);
   const queryClient = useQueryClient();
 
   const { data: existingTags } = useQuery({
@@ -27,16 +29,16 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
   });
 
   const { data: items } = useQuery({
-    queryKey: ['items', wishlistId],
-    queryFn: () => wishlistsApi.getItems(wishlistId),
+    queryKey: ['items', item.wishlist_id],
+    queryFn: () => wishlistsApi.getItems(item.wishlist_id),
   });
 
   // Get all unique brands from existing items
   const allBrands = useMemo(() => {
     if (!items) return [];
     const brandSet = new Set<string>();
-    items.forEach(item => {
-      if (item.brand) brandSet.add(item.brand);
+    items.forEach(i => {
+      if (i.brand) brandSet.add(i.brand);
     });
     return Array.from(brandSet).sort();
   }, [items]);
@@ -48,58 +50,29 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
     return allBrands.filter(b => b.toLowerCase().includes(query));
   }, [allBrands, brand]);
 
-  const createItemMutation = useMutation({
-    mutationFn: itemsApi.create,
+  const updateItemMutation = useMutation({
+    mutationFn: (data: any) => itemsApi.update(item.id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['items', wishlistId] });
+      queryClient.invalidateQueries({ queryKey: ['items', item.wishlist_id] });
       onClose();
-    },
-    onError: (error: any) => {
-      // Check if it's a duplicate error
-      if (error?.response?.status === 409) {
-        const data = error.response.data;
-        if (data.duplicates && Array.isArray(data.duplicates)) {
-          setDuplicates(data.duplicates);
-          setDuplicateType(data.duplicate_type);
-          setNewItemData(data.new_item);
-        }
-      }
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!url.trim()) {
+    if (!productName.trim()) {
       return;
     }
 
-    createItemMutation.mutate({
-      wishlist_id: wishlistId,
-      url: url.trim(),
+    updateItemMutation.mutate({
+      product_name: productName.trim(),
       brand: brand.trim() || undefined,
+      price: price ? parseFloat(price) : undefined,
+      sale_price: salePrice ? parseFloat(salePrice) : undefined,
       notes: notes.trim() || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
     });
-  };
-
-  const handleForceAdd = () => {
-    createItemMutation.mutate({
-      wishlist_id: wishlistId,
-      url: url.trim(),
-      brand: brand.trim() || undefined,
-      notes: notes.trim() || undefined,
-      tags: selectedTags.length > 0 ? selectedTags : undefined,
-      force_add: true,
-    });
-  };
-
-  const handleCancelDuplicate = () => {
-    setDuplicates([]);
-    setDuplicateType('');
-    setNewItemData(null);
-    createItemMutation.reset();
-    onClose();
   };
 
   const handleAddTag = () => {
@@ -119,110 +92,11 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
     }
   };
 
-  // Show duplicate comparison if duplicates found
-  if (duplicates.length > 0) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900">
-              {duplicateType === 'exact' ? 'Duplicate Item Found' : 'Similar Items Found'}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <p className="text-sm text-gray-600 mb-4">
-            {duplicateType === 'exact'
-              ? 'This item is already in your wishlist.'
-              : 'We found similar items in your wishlist. Compare them below:'}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {/* New item (from URL being added) */}
-            <div className="border-2 border-blue-500 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-blue-600 mb-2">New Item</h3>
-              {newItemData?.image_url && (
-                <img
-                  src={newItemData.image_url}
-                  alt={newItemData.product_name}
-                  className="w-full h-32 object-cover rounded mb-2"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
-              {newItemData?.product_name && (
-                <p className="font-semibold text-gray-900 mb-1">{newItemData.product_name}</p>
-              )}
-              {newItemData?.brand && <p className="text-sm text-gray-600 mb-1">{newItemData.brand}</p>}
-              {newItemData?.price && (
-                <p className="text-sm text-gray-900 font-medium mb-2">
-                  {newItemData.currency} {Number(newItemData.price).toFixed(2)}
-                </p>
-              )}
-              <p className="text-xs text-gray-500 mb-2 break-all">{url}</p>
-              {notes && <p className="text-xs text-gray-600 italic">Notes: "{notes}"</p>}
-            </div>
-
-            {/* Existing items */}
-            {duplicates.map((item) => (
-              <div key={item.id} className="border-2 border-orange-500 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-orange-600 mb-2">Already in Wishlist</h3>
-                {item.image_path && (
-                  <img
-                    src={`/api/wishlist/uploads/${item.image_path}`}
-                    alt={item.product_name}
-                    className="w-full h-32 object-cover rounded mb-2"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                )}
-                <p className="font-semibold text-gray-900 mb-1">{item.product_name}</p>
-                {item.brand && <p className="text-sm text-gray-600 mb-1">{item.brand}</p>}
-                {item.price && (
-                  <p className="text-sm text-gray-900 font-medium mb-2">
-                    {item.currency} {Number(item.price).toFixed(2)}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 break-all">{item.original_url}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleForceAdd}
-              disabled={createItemMutation.isPending}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {createItemMutation.isPending ? 'Adding...' : 'Add Anyway'}
-            </button>
-            <button
-              onClick={handleCancelDuplicate}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Normal add item form
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-lg w-full p-6">
+      <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Add Item to Wishlist</h2>
+          <h2 className="text-xl font-bold text-gray-900">Edit Item</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -235,21 +109,18 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-              Product URL <span className="text-red-500">*</span>
+            <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-1">
+              Product Name <span className="text-red-500">*</span>
             </label>
             <input
-              type="url"
-              id="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://..."
+              type="text"
+              id="productName"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              placeholder="Product name..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <p className="mt-1 text-xs text-gray-500">
-              We'll automatically extract product details from the URL
-            </p>
           </div>
 
           <div className="relative">
@@ -286,9 +157,40 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
                 ))}
               </div>
             )}
-            <p className="mt-1 text-xs text-gray-500">
-              Will be auto-filled from URL if available
-            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                Price
+              </label>
+              <input
+                type="number"
+                id="price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="salePrice" className="block text-sm font-medium text-gray-700 mb-1">
+                Sale Price
+              </label>
+              <input
+                type="number"
+                id="salePrice"
+                value={salePrice}
+                onChange={(e) => setSalePrice(e.target.value)}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
 
           <div>
@@ -372,11 +274,11 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
             )}
           </div>
 
-          {createItemMutation.isError && duplicates.length === 0 && (
+          {updateItemMutation.isError && (
             <div className="rounded-md bg-red-50 p-3">
               <p className="text-sm text-red-800">
-                {(createItemMutation.error as any)?.response?.data?.error ||
-                  'Failed to add item. Please check the URL and try again.'}
+                {(updateItemMutation.error as any)?.response?.data?.error ||
+                  'Failed to update item. Please try again.'}
               </p>
             </div>
           )}
@@ -384,10 +286,10 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
           <div className="flex gap-2 pt-4">
             <button
               type="submit"
-              disabled={createItemMutation.isPending}
+              disabled={updateItemMutation.isPending}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {createItemMutation.isPending ? 'Adding...' : 'Add Item'}
+              {updateItemMutation.isPending ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               type="button"

@@ -6,6 +6,43 @@ const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024; // 5MB limit
 
+// Common brand names to detect in product titles
+const COMMON_BRANDS = [
+  'Apple', 'Samsung', 'Sony', 'LG', 'Microsoft', 'Google', 'Amazon', 'Dell', 'HP', 'Lenovo',
+  'Asus', 'Acer', 'Nintendo', 'PlayStation', 'Xbox', 'Canon', 'Nikon', 'Panasonic', 'GoPro',
+  'Nike', 'Adidas', 'Puma', 'Under Armour', 'Reebok', 'New Balance', 'Vans', 'Converse',
+  'Lego', 'Hasbro', 'Mattel', 'Fisher-Price', 'Nerf', 'Hot Wheels', 'Barbie',
+  'KitchenAid', 'Cuisinart', 'Ninja', 'Instant Pot', 'Keurig', 'Breville', 'OXO',
+  'Dyson', 'Roomba', 'Shark', 'Bissell', 'Black+Decker', 'DeWalt', 'Bosch', 'Makita',
+  'Bose', 'JBL', 'Beats', 'Sennheiser', 'Audio-Technica', 'Logitech', 'Razer', 'Corsair',
+  'Fitbit', 'Garmin', 'Polar', 'TomTom', 'GoPro',
+  'North Face', 'Patagonia', 'Columbia', 'REI', 'Arc\'teryx',
+  'Levi\'s', 'Gap', 'Old Navy', 'H&M', 'Zara', 'Uniqlo',
+  '18 East', 'Eighteen East',
+];
+
+/**
+ * Extract brand name from product title using common brand patterns
+ */
+function extractBrandFromTitle(title: string): string | undefined {
+  if (!title) return undefined;
+
+  // Check if any common brand name appears at the start of the title
+  const titleLower = title.toLowerCase();
+  for (const brand of COMMON_BRANDS) {
+    const brandLower = brand.toLowerCase();
+    // Check if brand is at the start or after common prefixes
+    if (titleLower.startsWith(brandLower + ' ') ||
+        titleLower.startsWith(brandLower + '-') ||
+        titleLower.includes(` ${brandLower} `) ||
+        titleLower.includes(`-${brandLower}-`)) {
+      return brand;
+    }
+  }
+
+  return undefined;
+}
+
 export async function scrapeProduct(url: string): Promise<ScrapedProduct> {
   try {
     const response = await axios.get(url, {
@@ -208,10 +245,30 @@ function scrapeGeneric($: cheerio.CheerioAPI, url: string): ScrapedProduct {
     $('title').text().trim() ||
     '';
 
-  const brand =
+  let brand =
     $('meta[property="og:brand"]').attr('content') ||
     $('meta[property="product:brand"]').attr('content') ||
     '';
+
+  // If no brand found in meta tags, try to extract from product name
+  if (!brand && product_name) {
+    brand = extractBrandFromTitle(product_name) || '';
+  }
+
+  // Try to extract brand from page title (often in format: "Product Name – Brand")
+  if (!brand) {
+    const pageTitle = $('title').text().trim();
+    // Check for patterns like "Product – Brand" or "Product | Brand"
+    const titleBrandMatch = pageTitle.match(/[–—|]\s*(.+?)$/);
+    if (titleBrandMatch) {
+      const potentialBrand = titleBrandMatch[1].trim();
+      // Verify it's a known brand
+      const foundBrand = extractBrandFromTitle(potentialBrand);
+      if (foundBrand) {
+        brand = foundBrand;
+      }
+    }
+  }
 
   let price: number | undefined;
   let sale_price: number | undefined;

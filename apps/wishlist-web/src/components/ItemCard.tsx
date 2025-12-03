@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Item } from '../types';
+import EditItemModal from './EditItemModal';
 
 interface ItemCardProps {
   item: Item;
@@ -8,6 +9,7 @@ interface ItemCardProps {
 
 export default function ItemCard({ item, onDelete }: ItemCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const imageUrl = item.image_path
     ? `/api/wishlist/uploads/${item.image_path}`
@@ -25,6 +27,9 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
   const handleConfirmDelete = () => {
     onDelete();
   };
+
+  // Format currency symbol
+  const currencySymbol = item.currency === 'USD' ? '$' : item.currency;
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
@@ -56,8 +61,8 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
       </a>
 
       <div className="p-4">
-        {item.site_name && (
-          <p className="text-xs text-gray-500 mb-1">{item.site_name}</p>
+        {item.brand && (
+          <p className="text-xs text-gray-500 mb-1">{item.brand}</p>
         )}
 
         <a
@@ -71,20 +76,16 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
           </h3>
         </a>
 
-        {item.brand && (
-          <p className="text-sm text-gray-600 mb-2">{item.brand}</p>
-        )}
-
         <div className="flex items-baseline gap-2 mb-3">
           {salePrice && (
             <span className="text-lg font-bold text-gray-900">
-              {item.currency} {salePrice.toFixed(2)}
+              {currencySymbol}{salePrice.toFixed(2)}
             </span>
           )}
           {hasDiscount && (
             <>
               <span className="text-sm text-gray-500 line-through">
-                {item.currency} {price!.toFixed(2)}
+                {currencySymbol}{price!.toFixed(2)}
               </span>
               <span className="text-sm font-semibold text-green-600">
                 {discountPercent}% off
@@ -128,24 +129,35 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
             </button>
           </div>
         ) : (
-          <div className="flex gap-2">
-            <a
-              href={item.original_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 text-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
+              title="Edit item"
             >
-              View Product
-            </a>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
             <button
               onClick={() => setShowConfirm(true)}
               className="px-3 py-2 bg-red-50 text-red-600 text-sm rounded-md hover:bg-red-100"
+              title="Remove item"
             >
-              Remove
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
             </button>
           </div>
         )}
       </div>
+
+      {showEditModal && (
+        <EditItemModal
+          item={item}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
     </div>
   );
 }
