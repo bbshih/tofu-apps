@@ -11,11 +11,13 @@ interface AddItemModalProps {
 
 export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps) {
   const [url, setUrl] = useState('');
+  const [productName, setProductName] = useState('');
   const [brand, setBrand] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [duplicates, setDuplicates] = useState<any[]>([]);
   const [duplicateType, setDuplicateType] = useState<string>('');
   const [newItemData, setNewItemData] = useState<any>(null);
@@ -48,6 +50,16 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
     return allBrands.filter(b => b.toLowerCase().includes(query));
   }, [allBrands, brand]);
 
+  // Get filtered tag suggestions
+  const tagSuggestions = useMemo(() => {
+    if (!existingTags || !Array.isArray(existingTags)) return [];
+    if (!newTag) return existingTags;
+    const query = newTag.toLowerCase();
+    return existingTags.filter(tag =>
+      tag.name.toLowerCase().includes(query) && !selectedTags.includes(tag.name)
+    );
+  }, [existingTags, newTag, selectedTags]);
+
   const createItemMutation = useMutation({
     mutationFn: itemsApi.create,
     onSuccess: () => {
@@ -70,13 +82,15 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!url.trim()) {
+    // Require either URL or product name
+    if (!url.trim() && !productName.trim()) {
       return;
     }
 
     createItemMutation.mutate({
       wishlist_id: wishlistId,
-      url: url.trim(),
+      url: url.trim() || undefined,
+      product_name: productName.trim() || undefined,
       brand: brand.trim() || undefined,
       notes: notes.trim() || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
@@ -86,7 +100,8 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
   const handleForceAdd = () => {
     createItemMutation.mutate({
       wishlist_id: wishlistId,
-      url: url.trim(),
+      url: url.trim() || undefined,
+      product_name: productName.trim() || undefined,
       brand: brand.trim() || undefined,
       notes: notes.trim() || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
@@ -106,6 +121,7 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
     if (newTag.trim() && !selectedTags.includes(newTag.trim())) {
       setSelectedTags([...selectedTags, newTag.trim()]);
       setNewTag('');
+      setShowTagDropdown(false);
     }
   };
 
@@ -113,9 +129,11 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
     setSelectedTags(selectedTags.filter((t) => t !== tag));
   };
 
-  const handleSelectExistingTag = (tagName: string) => {
+  const handleSelectTag = (tagName: string) => {
     if (!selectedTags.includes(tagName)) {
       setSelectedTags([...selectedTags, tagName]);
+      setNewTag('');
+      setShowTagDropdown(false);
     }
   };
 
@@ -236,19 +254,36 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-              Product URL <span className="text-red-500">*</span>
+              Product URL
             </label>
             <input
               type="url"
               id="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://..."
+              placeholder="https://... (optional)"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
             <p className="mt-1 text-xs text-gray-500">
-              We'll automatically extract product details from the URL
+              Add a URL to automatically extract product details
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-1">
+              Product Name {!url && <span className="text-red-500">*</span>}
+            </label>
+            <input
+              type="text"
+              id="productName"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              placeholder="Enter product name..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required={!url.trim()}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              {url ? 'Will be auto-filled from URL if available' : 'Required when no URL is provided'}
             </p>
           </div>
 
@@ -305,54 +340,48 @@ export default function AddItemModal({ wishlistId, onClose }: AddItemModalProps)
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tags
             </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-                placeholder="Add a tag..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                onClick={handleAddTag}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-              >
-                Add
-              </button>
-            </div>
-
-            {existingTags && Array.isArray(existingTags) && existingTags.length > 0 && (
-              <div className="mb-2">
-                <p className="text-xs text-gray-500 mb-1">Existing tags:</p>
-                <div className="flex flex-wrap gap-1">
-                  {existingTags.map((tag) => (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      onClick={() => handleSelectExistingTag(tag.name)}
-                      disabled={selectedTags.includes(tag.name)}
-                      className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {tag.name}
-                    </button>
-                  ))}
-                </div>
+            <input
+              type="text"
+              value={newTag}
+              onChange={(e) => {
+                setNewTag(e.target.value);
+                setShowTagDropdown(true);
+              }}
+              onFocus={() => setShowTagDropdown(true)}
+              onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddTag();
+                }
+              }}
+              placeholder="Search or add a tag..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {showTagDropdown && tagSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-auto">
+                {tagSuggestions.map((tag) => (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => handleSelectTag(tag.name)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    {tag.name}
+                  </button>
+                ))}
               </div>
             )}
+            <p className="mt-1 text-xs text-gray-500">
+              Type to search existing tags or press Enter to create a new one
+            </p>
 
             {selectedTags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1 mt-2">
                 {selectedTags.map((tag) => (
                   <span
                     key={tag}

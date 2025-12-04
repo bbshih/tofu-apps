@@ -11,8 +11,13 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
 
     const userId = req.user?.id;
 
-    if (!wishlist_id || !url) {
-      return res.status(400).json({ error: 'Wishlist ID and URL are required' });
+    if (!wishlist_id) {
+      return res.status(400).json({ error: 'Wishlist ID is required' });
+    }
+
+    // Require either URL or product_name
+    if (!url && !product_name) {
+      return res.status(400).json({ error: 'Either URL or product name is required' });
     }
 
     // Verify wishlist belongs to user
@@ -36,8 +41,8 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
       image_url: null,
     };
 
-    // If not all data provided, scrape it first (before duplicate check)
-    if (!product_name) {
+    // If URL is provided and product_name is not, scrape it first (before duplicate check)
+    if (url && !product_name) {
       try {
         const scrapedData = await scrapeProduct(url);
         itemData = {
@@ -58,8 +63,8 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
       }
     }
 
-    // Skip duplicate check if force_add is true
-    if (!force_add) {
+    // Skip duplicate check if force_add is true or no URL provided
+    if (!force_add && url) {
       // Check for exact URL match
       const exactMatch = await query(
         'SELECT id, product_name, brand, price, sale_price, currency, image_path, original_url FROM items WHERE wishlist_id = $1 AND original_url = $2',
@@ -111,7 +116,7 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
       }
     }
 
-    // Insert item
+    // Insert item (URL can be null)
     const itemResult = await query(
       `INSERT INTO items (
         wishlist_id, product_name, brand, price, sale_price, currency,
@@ -124,7 +129,7 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
         itemData.price,
         itemData.sale_price,
         itemData.currency,
-        url,
+        url || null,
         itemData.site_name,
         itemData.image_path,
         notes,

@@ -33,18 +33,40 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
-      <a
-        href={item.original_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
-      >
+      {item.original_url ? (
+        <a
+          href={item.original_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          <div className="aspect-square bg-gray-100 overflow-hidden flex items-center justify-center">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={item.product_name}
+                className="w-full h-full object-cover hover:scale-105 transition-transform"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="text-gray-400 text-center p-4">
+                <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-sm">No Image</span>
+              </div>
+            )}
+          </div>
+        </a>
+      ) : (
         <div className="aspect-square bg-gray-100 overflow-hidden flex items-center justify-center">
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={item.product_name}
-              className="w-full h-full object-cover hover:scale-105 transition-transform"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
@@ -58,23 +80,29 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
             </div>
           )}
         </div>
-      </a>
+      )}
 
       <div className="p-4">
         {item.brand && (
           <p className="text-xs text-gray-500 mb-1">{item.brand}</p>
         )}
 
-        <a
-          href={item.original_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-blue-600"
-        >
+        {item.original_url ? (
+          <a
+            href={item.original_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-blue-600"
+          >
+            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+              {item.product_name}
+            </h3>
+          </a>
+        ) : (
           <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
             {item.product_name}
           </h3>
-        </a>
+        )}
 
         <div className="flex items-baseline gap-2 mb-3">
           {salePrice && (
