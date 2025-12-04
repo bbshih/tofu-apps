@@ -9,6 +9,9 @@ export default function Dashboard() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [wishlistToDelete, setWishlistToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [wishlistToEdit, setWishlistToEdit] = useState<{ id: number; name: string } | null>(null);
+  const [editName, setEditName] = useState('');
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -36,6 +39,16 @@ export default function Dashboard() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) => wishlistsApi.update(id, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+      setShowEditModal(false);
+      setWishlistToEdit(null);
+      setEditName('');
+    },
+  });
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (newListName.trim()) {
@@ -57,6 +70,25 @@ export default function Dashboard() {
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setWishlistToDelete(null);
+  };
+
+  const handleEditClick = (id: number, name: string) => {
+    setWishlistToEdit({ id, name });
+    setEditName(name);
+    setShowEditModal(true);
+  };
+
+  const handleConfirmEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (wishlistToEdit && editName.trim()) {
+      updateMutation.mutate({ id: wishlistToEdit.id, name: editName });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditModal(false);
+    setWishlistToEdit(null);
+    setEditName('');
   };
 
   return (
@@ -150,7 +182,14 @@ export default function Dashboard() {
                       Updated {new Date(wishlist.updated_at).toLocaleDateString()}
                     </p>
                   </Link>
-                  <div className="px-6 pb-4">
+                  <div className="px-6 pb-4 flex gap-3">
+                    <button
+                      onClick={() => handleEditClick(wishlist.id, wishlist.name)}
+                      disabled={updateMutation.isPending}
+                      className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => handleDeleteClick(wishlist.id, wishlist.name)}
                       disabled={deleteMutation.isPending}
@@ -177,6 +216,43 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      {showEditModal && wishlistToEdit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Edit Wishlist
+            </h3>
+            <form onSubmit={handleConfirmEdit}>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Wishlist name..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
+                autoFocus
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  disabled={updateMutation.isPending}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateMutation.isPending || !editName.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {updateMutation.isPending ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {showDeleteModal && wishlistToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
