@@ -145,3 +145,34 @@ export const getWishlistItems = async (req: WishlistAuthRequest, res: Response) 
     res.status(500).json({ _error: 'Failed to fetch wishlist items' });
   }
 };
+
+export const getAllItems = async (req: WishlistAuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    // Get all items from all wishlists belonging to the user with their tags and wishlist name
+    const itemsResult = await query(
+      `SELECT i.*,
+              w.name as wishlist_name,
+              COALESCE(
+                json_agg(
+                  json_build_object('id', t.id, 'name', t.name)
+                ) FILTER (WHERE t.id IS NOT NULL),
+                '[]'
+              ) as tags
+       FROM items i
+       INNER JOIN wishlists w ON i.wishlist_id = w.id
+       LEFT JOIN item_tags it ON i.id = it.item_id
+       LEFT JOIN tags t ON it.tag_id = t.id
+       WHERE w.user_id = $1
+       GROUP BY i.id, w.name
+       ORDER BY i.ranking DESC, i.created_at DESC`,
+      [userId]
+    );
+
+    res.json(itemsResult.rows);
+  } catch (_error) {
+    console.error('Error fetching all items:', _error);
+    res.status(500).json({ _error: 'Failed to fetch all items' });
+  }
+};

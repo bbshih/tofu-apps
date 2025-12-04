@@ -1,20 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { wishlistsApi } from '../api/wishlists';
 import { useAuth } from '../hooks/useAuth';
-import { setDashboardPageTitle } from '../utils/metaTags';
 
 export default function Dashboard() {
-  useEffect(() => {
-    setDashboardPageTitle();
-  }, []);
   const [newListName, setNewListName] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [wishlistToDelete, setWishlistToDelete] = useState<{ id: number; name: string } | null>(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const { data: wishlists, isLoading, error } = useQuery({
+  const { data: wishlists, isLoading } = useQuery({
     queryKey: ['wishlists'],
     queryFn: wishlistsApi.getAll,
   });
@@ -32,6 +31,8 @@ export default function Dashboard() {
     mutationFn: wishlistsApi.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+      setShowDeleteModal(false);
+      setWishlistToDelete(null);
     },
   });
 
@@ -42,10 +43,20 @@ export default function Dashboard() {
     }
   };
 
-  const handleDelete = (id: number, name: string) => {
-    if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      deleteMutation.mutate(id);
+  const handleDeleteClick = (id: number, name: string) => {
+    setWishlistToDelete({ id, name });
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (wishlistToDelete) {
+      deleteMutation.mutate(wishlistToDelete.id);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setWishlistToDelete(null);
   };
 
   return (
@@ -57,12 +68,6 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-gray-900">My Wishlists</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                to="/bookmarklet"
-                className="text-sm text-indigo-600 hover:text-indigo-900 font-medium"
-              >
-                📌 Bookmarklet
-              </Link>
               <span className="text-sm text-gray-700">{user?.email}</span>
               <button
                 onClick={logout}
@@ -81,12 +86,20 @@ export default function Dashboard() {
             <h2 className="text-2xl font-semibold text-gray-900">
               Your Wishlists
             </h2>
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Create New Wishlist
-            </button>
+            <div className="flex gap-3">
+              <Link
+                to="/all-items"
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                View All Items
+              </Link>
+              <button
+                onClick={() => setShowCreateForm(!showCreateForm)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Create New Wishlist
+              </button>
+            </div>
           </div>
 
           {showCreateForm && (
@@ -122,15 +135,7 @@ export default function Dashboard() {
             <div className="text-center py-12">
               <div className="text-gray-500">Loading wishlists...</div>
             </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <div className="rounded-md bg-red-50 p-4">
-                <p className="text-sm text-red-800">
-                  {(error as any)?.response?.data?.error || 'Failed to load wishlists. Please try again.'}
-                </p>
-              </div>
-            </div>
-          ) : wishlists && Array.isArray(wishlists) && wishlists.length > 0 ? (
+          ) : wishlists && wishlists.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {wishlists.map((wishlist) => (
                 <div
@@ -147,7 +152,7 @@ export default function Dashboard() {
                   </Link>
                   <div className="px-6 pb-4">
                     <button
-                      onClick={() => handleDelete(wishlist.id, wishlist.name)}
+                      onClick={() => handleDeleteClick(wishlist.id, wishlist.name)}
                       disabled={deleteMutation.isPending}
                       className="text-sm text-red-600 hover:text-red-800 disabled:opacity-50"
                     >
@@ -172,6 +177,35 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      {showDeleteModal && wishlistToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirm Delete
+            </h3>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete "{wishlistToDelete.name}"?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleCancelDelete}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

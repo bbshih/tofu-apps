@@ -30,4 +30,9 @@ export const wishlistsApi = {
     const response = await apiClient.get<Item[]>(`/wishlists/${id}/items`);
     return response.data;
   },
+
+  getAllItems: async (): Promise<Item[]> => {
+    const response = await apiClient.get<Item[]>('/wishlists/items/all');
+    return response.data;
+  },
 };

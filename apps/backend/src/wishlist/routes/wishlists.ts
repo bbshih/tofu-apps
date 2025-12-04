@@ -6,6 +6,7 @@ import {
   updateWishlist,
   deleteWishlist,
   getWishlistItems,
+  getAllItems,
 } from '../controllers/wishlistController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -16,6 +17,7 @@ router.use(authenticateToken);
 
 router.get('/', getAllWishlists);
 router.post('/', createWishlist);
+router.get('/items/all', getAllItems);
 router.get('/:id', getWishlist);
 router.put('/:id', updateWishlist);
 router.delete('/:id', deleteWishlist);
