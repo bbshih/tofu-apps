@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import WishlistDetail from './pages/WishlistDetail';
 import Bookmarklet from './pages/Bookmarklet';
 import AllItems from './pages/AllItems';
+import Stores from './pages/Stores';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,6 +80,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <AllItems />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/stores"
+              element={
+                <PrivateRoute>
+                  <Stores />
                 </PrivateRoute>
               }
             />

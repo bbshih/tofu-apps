@@ -31,6 +31,9 @@
     "format": "npm run format --workspaces --if-present",
     "format:check": "npm run format:check --workspaces --if-present",
     "type-check": "npm run type-check -w backend",
+    "test": "npm run test --workspaces --if-present",
+    "test:backend": "npm run test -w backend",
+    "test:wishlist": "npm run test -w wishlist-web",
     "clean": "rm -rf apps/*/dist apps/*/node_modules node_modules apps/backend/public/*",
     "install:all": "npm install",
     "prepare": "husky"

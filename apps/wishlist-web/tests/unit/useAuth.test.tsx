@@ -1,7 +1,8 @@
+import React, { ReactNode } from 'react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../../src/hooks/useAuth';
-import { ReactNode } from 'react';
+import { useAuth } from '../../src/hooks/useAuth';
+import { AuthProvider } from '../../src/contexts/AuthContext';
 
 describe('useAuth', () => {
   beforeEach(() => {

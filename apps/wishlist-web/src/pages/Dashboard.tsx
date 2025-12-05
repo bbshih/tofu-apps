@@ -120,6 +120,12 @@ export default function Dashboard() {
             </h2>
             <div className="flex gap-3">
               <Link
+                to="/stores"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                Store Policies
+              </Link>
+              <Link
                 to="/all-items"
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >

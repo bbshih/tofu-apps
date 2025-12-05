@@ -85,12 +85,70 @@ CREATE TABLE IF NOT EXISTS item_tags (
   PRIMARY KEY (item_id, tag_id)
 );
 
+-- Stores table for return and price matching policies
+CREATE TABLE IF NOT EXISTS stores (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  domain VARCHAR(255),
+  return_policy TEXT,
+  return_window_days INTEGER,
+  price_match_policy TEXT,
+  price_match_window_days INTEGER,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, name)
+);
+
+-- Add structured policy columns to stores table if they don't exist
+DO $$
+BEGIN
+  -- Return policy structured fields
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='free_returns') THEN
+    ALTER TABLE stores ADD COLUMN free_returns BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='free_return_shipping') THEN
+    ALTER TABLE stores ADD COLUMN free_return_shipping BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='paid_return_cost') THEN
+    ALTER TABLE stores ADD COLUMN paid_return_cost DECIMAL(10, 2);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='restocking_fee_percent') THEN
+    ALTER TABLE stores ADD COLUMN restocking_fee_percent INTEGER;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='exchange_only') THEN
+    ALTER TABLE stores ADD COLUMN exchange_only BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='store_credit_only') THEN
+    ALTER TABLE stores ADD COLUMN store_credit_only BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='receipt_required') THEN
+    ALTER TABLE stores ADD COLUMN receipt_required BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='original_packaging_required') THEN
+    ALTER TABLE stores ADD COLUMN original_packaging_required BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='final_sale_items') THEN
+    ALTER TABLE stores ADD COLUMN final_sale_items BOOLEAN DEFAULT false;
+  END IF;
+  -- Price match structured fields
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='price_match_competitors') THEN
+    ALTER TABLE stores ADD COLUMN price_match_competitors BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='price_match_own_sales') THEN
+    ALTER TABLE stores ADD COLUMN price_match_own_sales BOOLEAN DEFAULT false;
+  END IF;
+END $$;
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_wishlists_user_id ON wishlists(user_id);
 CREATE INDEX IF NOT EXISTS idx_items_wishlist_id ON items(wishlist_id);
 CREATE INDEX IF NOT EXISTS idx_tags_user_id ON tags(user_id);
 CREATE INDEX IF NOT EXISTS idx_item_tags_item_id ON item_tags(item_id);
 CREATE INDEX IF NOT EXISTS idx_item_tags_tag_id ON item_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_stores_user_id ON stores(user_id);
+CREATE INDEX IF NOT EXISTS idx_stores_name ON stores(name);
 `;
 
 async function runMigrations() {

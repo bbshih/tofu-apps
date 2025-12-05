@@ -70,6 +70,7 @@ import wishlistRoutes from './routes/wishlists.js';
 import itemRoutes from './routes/items.js';
 import tagRoutes from './routes/tags.js';
 import bookmarkletRoutes from './routes/bookmarklet.js';
+import storeRoutes from './routes/stores.js';
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -77,6 +78,7 @@ router.use('/wishlists', wishlistRoutes);
 router.use('/items', itemRoutes);
 router.use('/tags', tagRoutes);
 router.use('/bookmarklet', bookmarkletRoutes);
+router.use('/stores', storeRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
