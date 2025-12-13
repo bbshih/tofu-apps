@@ -118,7 +118,13 @@ export default function Dashboard() {
             <h2 className="text-2xl font-semibold text-gray-900">
               Your Wishlists
             </h2>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/bookmarklet"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                Bookmarklet
+              </Link>
               <Link
                 to="/stores"
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
