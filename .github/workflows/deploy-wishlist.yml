@@ -42,6 +42,26 @@ jobs:
           mkdir -p apps/backend/public/wishlist
           cp -r apps/wishlist-web/dist/* apps/backend/public/wishlist/
 
+      - name: Validate deployment secrets
+        run: |
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "❌ Error: VPS_SSH_KEY secret is not configured"
+            echo "Please add the VPS_SSH_KEY secret in GitHub repository settings:"
+            echo "Settings → Secrets and variables → Actions → New repository secret"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "❌ Error: VPS_HOST secret is not configured"
+            echo "Please add the VPS_HOST secret in GitHub repository settings"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_USER }}" ]; then
+            echo "❌ Error: VPS_USER secret is not configured"
+            echo "Please add the VPS_USER secret in GitHub repository settings"
+            exit 1
+          fi
+          echo "✅ All deployment secrets are configured"
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
