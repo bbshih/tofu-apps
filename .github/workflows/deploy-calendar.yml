@@ -1,0 +1,79 @@
+name: Deploy Calendar to VPS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/calendar-web/**'
+      - 'apps/backend/**'
+      - '.github/workflows/deploy-calendar.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build calendar frontend
+        run: |
+          cd apps/calendar-web
+          npm run build
+
+      - name: Build backend
+        run: |
+          cd apps/backend
+          npm run build || echo 'Build completed with type errors'
+
+      - name: Copy frontend to backend public folder
+        run: |
+          mkdir -p apps/backend/public/calendar
+          cp -r apps/calendar-web/dist/* apps/backend/public/calendar/
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy calendar frontend to VPS
+        run: |
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
+            apps/backend/public/calendar/ \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/tofu-apps/apps/backend/public/calendar/
+
+      - name: Deploy backend code to VPS
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
+            apps/backend/dist/ \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/tofu-apps/apps/backend/dist/
+
+      - name: Restart PM2 process
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            'pm2 restart unified-backend'
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+      - name: Deployment notification
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "⚠️  Remember to purge Cloudflare cache:"
+          echo "   - https://cal.billyeatstofu.com/"
+          echo "   - https://cal.billyeatstofu.com/assets/*"

@@ -6,6 +6,8 @@ yarn-error.log*
 
 # Build output
 dist/
+apps/backend/public/wishlist/
+apps/backend/public/calendar/
 
 # Environment variables
 .env
