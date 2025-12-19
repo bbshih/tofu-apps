@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { wishlistsApi } from '../api/wishlists';
-import { useAuth } from '../hooks/useAuth';
+import Navbar from '../components/Navbar';
 
 export default function Dashboard() {
   const [newListName, setNewListName] = useState('');
@@ -14,7 +14,6 @@ export default function Dashboard() {
   const [editName, setEditName] = useState('');
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
 
   const { data: wishlists, isLoading } = useQuery({
     queryKey: ['wishlists'],
@@ -93,24 +92,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">My Wishlists</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">{user?.email}</span>
-              <button
-                onClick={logout}
-                className="text-sm text-gray-700 hover:text-gray-900"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
@@ -129,7 +111,7 @@ export default function Dashboard() {
                 to="/stores"
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
               >
-                Store Policies
+                Stores
               </Link>
               <Link
                 to="/all-items"

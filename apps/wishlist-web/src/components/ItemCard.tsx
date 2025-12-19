@@ -163,7 +163,7 @@ export default function ItemCard({ item, onDelete }: ItemCardProps) {
               <Link
                 to={`/stores?highlight=${encodeURIComponent(item.site_name)}`}
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                title="View store policies"
+                title={`View ${item.site_name} policies`}
               >
                 {item.site_name}
               </Link>

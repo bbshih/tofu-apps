@@ -139,6 +139,13 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='price_match_own_sales') THEN
     ALTER TABLE stores ADD COLUMN price_match_own_sales BOOLEAN DEFAULT false;
   END IF;
+  -- Policy URL fields
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='return_policy_url') THEN
+    ALTER TABLE stores ADD COLUMN return_policy_url TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='price_match_policy_url') THEN
+    ALTER TABLE stores ADD COLUMN price_match_policy_url TEXT;
+  END IF;
 END $$;
 
 -- Create indexes for better query performance
@@ -149,6 +156,69 @@ CREATE INDEX IF NOT EXISTS idx_item_tags_item_id ON item_tags(item_id);
 CREATE INDEX IF NOT EXISTS idx_item_tags_tag_id ON item_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_stores_user_id ON stores(user_id);
 CREATE INDEX IF NOT EXISTS idx_stores_name ON stores(name);
+
+-- Community Store Policies table (shared across all users)
+CREATE TABLE IF NOT EXISTS community_store_policies (
+  id SERIAL PRIMARY KEY,
+  domain VARCHAR(255) NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+
+  -- Return policy fields
+  return_window_days INTEGER,
+  free_returns BOOLEAN DEFAULT false,
+  free_return_shipping BOOLEAN DEFAULT false,
+  paid_return_cost DECIMAL(10, 2),
+  restocking_fee_percent INTEGER,
+  exchange_only BOOLEAN DEFAULT false,
+  store_credit_only BOOLEAN DEFAULT false,
+  receipt_required BOOLEAN DEFAULT false,
+  original_packaging_required BOOLEAN DEFAULT false,
+  final_sale_items BOOLEAN DEFAULT false,
+  return_policy_url TEXT,
+  return_policy_notes TEXT,
+
+  -- Price match policy fields
+  price_match_window_days INTEGER,
+  price_match_competitors BOOLEAN DEFAULT false,
+  price_match_own_sales BOOLEAN DEFAULT false,
+  price_match_policy_url TEXT,
+  price_match_policy_notes TEXT,
+
+  -- Metadata
+  contributed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  verified_count INTEGER DEFAULT 0,
+  report_count INTEGER DEFAULT 0,
+  last_verified_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_community_policies_domain ON community_store_policies(domain);
+CREATE INDEX IF NOT EXISTS idx_community_policies_name ON community_store_policies(name);
+
+-- Community Policy Verifications table
+CREATE TABLE IF NOT EXISTS community_policy_verifications (
+  id SERIAL PRIMARY KEY,
+  policy_id INTEGER NOT NULL REFERENCES community_store_policies(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  is_accurate BOOLEAN NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(policy_id, user_id)
+);
+
+-- Community Policy Reports table
+CREATE TABLE IF NOT EXISTS community_policy_reports (
+  id SERIAL PRIMARY KEY,
+  policy_id INTEGER NOT NULL REFERENCES community_store_policies(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reason VARCHAR(100) NOT NULL,
+  details TEXT,
+  status VARCHAR(20) DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_policy_reports_status ON community_policy_reports(status);
 `;
 
 async function runMigrations() {

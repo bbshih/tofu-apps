@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../api/client';
 import { generateBookmarkletScript, getApiUrl } from '../utils/bookmarklet';
 import { setBookmarkletPageTitle } from '../utils/metaTags';
+import Navbar from '../components/Navbar';
 
 interface BookmarkletToken {
   token: string;
@@ -14,7 +14,6 @@ export default function Bookmarklet() {
   useEffect(() => {
     setBookmarkletPageTitle();
   }, []);
-  const { user } = useAuth();
   const [tokenData, setTokenData] = useState<BookmarkletToken | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +53,9 @@ export default function Bookmarklet() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="max-w-4xl mx-auto py-8 px-4">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Wishlist Bookmarklet</h1>
           <p className="text-gray-600 mb-6">

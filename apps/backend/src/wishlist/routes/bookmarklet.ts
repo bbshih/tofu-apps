@@ -6,6 +6,8 @@ import {
   generateBookmarkletToken,
   getWishlistsByToken,
   addItemViaBookmarklet,
+  capturePolicyViaBookmarklet,
+  getPolicyCaptureResult,
 } from '../controllers/bookmarkletController.js';
 
 const router = express.Router();
@@ -32,5 +34,9 @@ router.post('/generate-token', authenticateToken, generateBookmarkletToken);
 // Public endpoints for bookmarklet (token-based auth, allow any origin)
 router.get('/wishlists', bookmarkletCors, bookmarkletLimiter, getWishlistsByToken);
 router.post('/add-item', bookmarkletCors, bookmarkletLimiter, addItemViaBookmarklet);
+
+// Policy capture endpoints
+router.post('/capture-policy', bookmarkletCors, bookmarkletLimiter, capturePolicyViaBookmarklet);
+router.get('/policy-result', bookmarkletCors, bookmarkletLimiter, getPolicyCaptureResult);
 
 export default router;

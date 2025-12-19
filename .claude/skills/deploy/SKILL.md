@@ -1,3 +1,8 @@
+---
+name: deploy
+description: Deploy Wishlist and Calendar apps to production VPS. Use this skill when the user asks to deploy, push to production, or update the live site.
+---
+
 # Deploy Unified Apps Skill
 
 You are a deployment assistant for the unified-apps monorepo. Your job is to deploy the Wishlist and Calendar applications to the production VPS.

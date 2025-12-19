@@ -71,8 +71,10 @@ export const createStore = async (req: WishlistAuthRequest, res: Response) => {
       name,
       domain,
       return_policy,
+      return_policy_url,
       return_window_days,
       price_match_policy,
+      price_match_policy_url,
       price_match_window_days,
       notes,
       // Structured return policy fields
@@ -95,18 +97,20 @@ export const createStore = async (req: WishlistAuthRequest, res: Response) => {
     }
 
     const result = await query(
-      `INSERT INTO stores (user_id, name, domain, return_policy, return_window_days, price_match_policy, price_match_window_days, notes,
+      `INSERT INTO stores (user_id, name, domain, return_policy, return_policy_url, return_window_days, price_match_policy, price_match_policy_url, price_match_window_days, notes,
         free_returns, free_return_shipping, paid_return_cost, restocking_fee_percent, exchange_only, store_credit_only,
         receipt_required, original_packaging_required, final_sale_items, price_match_competitors, price_match_own_sales)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING *`,
       [
         userId,
         name,
         domain || null,
         return_policy || null,
+        return_policy_url || null,
         return_window_days || null,
         price_match_policy || null,
+        price_match_policy_url || null,
         price_match_window_days || null,
         notes || null,
         free_returns || false,
@@ -142,8 +146,10 @@ export const updateStore = async (req: WishlistAuthRequest, res: Response) => {
       name,
       domain,
       return_policy,
+      return_policy_url,
       return_window_days,
       price_match_policy,
+      price_match_policy_url,
       price_match_window_days,
       notes,
       // Structured return policy fields
@@ -178,6 +184,10 @@ export const updateStore = async (req: WishlistAuthRequest, res: Response) => {
       updates.push(`return_policy = $${paramCount++}`);
       values.push(return_policy || null);
     }
+    if (return_policy_url !== undefined) {
+      updates.push(`return_policy_url = $${paramCount++}`);
+      values.push(return_policy_url || null);
+    }
     if (return_window_days !== undefined) {
       updates.push(`return_window_days = $${paramCount++}`);
       values.push(return_window_days || null);
@@ -185,6 +195,10 @@ export const updateStore = async (req: WishlistAuthRequest, res: Response) => {
     if (price_match_policy !== undefined) {
       updates.push(`price_match_policy = $${paramCount++}`);
       values.push(price_match_policy || null);
+    }
+    if (price_match_policy_url !== undefined) {
+      updates.push(`price_match_policy_url = $${paramCount++}`);
+      values.push(price_match_policy_url || null);
     }
     if (price_match_window_days !== undefined) {
       updates.push(`price_match_window_days = $${paramCount++}`);

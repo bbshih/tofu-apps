@@ -3,6 +3,7 @@ import { query } from '../db.js';
 import { WishlistAuthRequest } from '../types/index.js';
 import { scrapeProduct } from '../services/scraperService.js';
 import { downloadAndSaveImage } from '../utils/imageDownloader.js';
+import { parseClientFetchedHtml } from '../services/policyScraperService.js';
 import crypto from 'crypto';
 
 /**
@@ -195,5 +196,153 @@ export const addItemViaBookmarklet = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error adding item via bookmarklet:', error);
     res.status(500).json({ error: 'Failed to add item' });
+  }
+};
+
+/**
+ * Capture policy HTML via bookmarklet (public endpoint)
+ * The bookmarklet captures the page's HTML and sends it here for parsing
+ */
+export const capturePolicyViaBookmarklet = async (req: Request, res: Response) => {
+  try {
+    const { token, html, url, policy_type } = req.body;
+
+    if (!token || !html || !url) {
+      return res.status(400).json({
+        error: 'Token, HTML, and URL are required',
+      });
+    }
+
+    // Validate policy_type
+    const validTypes = ['return', 'price_match', 'both'];
+    const type = policy_type || 'return';
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({
+        error: 'Invalid policy_type. Must be: return, price_match, or both',
+      });
+    }
+
+    // Validate HTML size (limit to 2MB)
+    if (html.length > 2 * 1024 * 1024) {
+      return res.status(400).json({ error: 'HTML content too large' });
+    }
+
+    // Find user by token and check expiration
+    const userResult = await query(
+      'SELECT id, bookmarklet_token_created_at FROM users WHERE bookmarklet_token = $1',
+      [token]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid bookmarklet token' });
+    }
+
+    const user = userResult.rows[0];
+    const tokenAge = Date.now() - new Date(user.bookmarklet_token_created_at).getTime();
+    const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000;
+
+    if (tokenAge > ninetyDaysInMs) {
+      return res.status(401).json({
+        error: 'Bookmarklet token expired. Please regenerate from your dashboard.',
+      });
+    }
+
+    // Parse the HTML based on policy type
+    let result;
+    if (type === 'return') {
+      result = parseClientFetchedHtml(html, url, null, null);
+    } else if (type === 'price_match') {
+      result = parseClientFetchedHtml(null, null, html, url);
+    } else {
+      // 'both' - assume the page has both return and price match info
+      result = parseClientFetchedHtml(html, url, html, url);
+    }
+
+    // Generate a unique session ID for this capture
+    // This allows the frontend to poll for results
+    const sessionId = crypto.randomBytes(16).toString('hex');
+
+    // Store the result temporarily (in-memory cache, 5 minute TTL)
+    policyCaptureCache.set(sessionId, {
+      result,
+      url,
+      userId: user.id,
+      timestamp: Date.now(),
+    });
+
+    // Clean up old cache entries
+    cleanupPolicyCaptureCache();
+
+    res.json({
+      success: true,
+      session_id: sessionId,
+      result,
+    });
+  } catch (error) {
+    console.error('Error capturing policy via bookmarklet:', error);
+    res.status(500).json({ error: 'Failed to capture policy' });
+  }
+};
+
+// In-memory cache for policy captures (session_id -> result)
+const policyCaptureCache = new Map<string, {
+  result: ReturnType<typeof parseClientFetchedHtml>;
+  url: string;
+  userId: number;
+  timestamp: number;
+}>();
+
+const POLICY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function cleanupPolicyCaptureCache() {
+  const now = Date.now();
+  for (const [key, value] of policyCaptureCache.entries()) {
+    if (now - value.timestamp > POLICY_CACHE_TTL) {
+      policyCaptureCache.delete(key);
+    }
+  }
+}
+
+/**
+ * Get captured policy result by session ID (public endpoint)
+ * Frontend polls this after user clicks bookmarklet
+ */
+export const getPolicyCaptureResult = async (req: Request, res: Response) => {
+  try {
+    const { session_id, token } = req.query;
+
+    if (!session_id || !token) {
+      return res.status(400).json({ error: 'session_id and token are required' });
+    }
+
+    // Verify token
+    const userResult = await query(
+      'SELECT id FROM users WHERE bookmarklet_token = $1',
+      [token]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const cached = policyCaptureCache.get(session_id as string);
+
+    if (!cached) {
+      return res.status(404).json({ error: 'Session not found or expired' });
+    }
+
+    // Verify the session belongs to this user
+    if (cached.userId !== userResult.rows[0].id) {
+      return res.status(403).json({ error: 'Session does not belong to this user' });
+    }
+
+    res.json({
+      success: true,
+      result: cached.result,
+      url: cached.url,
+    });
+  } catch (error) {
+    console.error('Error getting policy capture result:', error);
+    res.status(500).json({ error: 'Failed to get result' });
   }
 };

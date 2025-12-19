@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { wishlistsApi } from '../api/wishlists';
 import { itemsApi } from '../api/items';
 import ItemCard from '../components/ItemCard';
 import AddItemModal from '../components/AddItemModal';
+import Navbar from '../components/Navbar';
 
 export default function WishlistDetail() {
   const { id } = useParams<{ id: string }>();
@@ -52,31 +53,23 @@ export default function WishlistDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+      <Navbar />
+
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                ← Back
-              </Link>
-              <h1 className="text-xl font-bold text-gray-900">
-                {wishlist?.name || 'Wishlist'}
-              </h1>
-            </div>
-            <div className="flex items-center">
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Add Item
-              </button>
-            </div>
+          <div className="flex justify-between h-16 items-center">
+            <h1 className="text-xl font-bold text-gray-900">
+              {wishlist?.name || 'Wishlist'}
+            </h1>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Add Item
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">

@@ -71,6 +71,7 @@ import itemRoutes from './routes/items.js';
 import tagRoutes from './routes/tags.js';
 import bookmarkletRoutes from './routes/bookmarklet.js';
 import storeRoutes from './routes/stores.js';
+import communityPolicyRoutes from './routes/communityPolicies.js';
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -79,6 +80,7 @@ router.use('/items', itemRoutes);
 router.use('/tags', tagRoutes);
 router.use('/bookmarklet', bookmarkletRoutes);
 router.use('/stores', storeRoutes);
+router.use('/community-policies', communityPolicyRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
