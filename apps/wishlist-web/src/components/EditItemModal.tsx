@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { itemsApi } from '../api/items';
 import { tagsApi } from '../api/tags';
@@ -16,6 +16,7 @@ export default function EditItemModal({ item, onClose }: EditItemModalProps) {
   const [price, setPrice] = useState(item.price?.toString() || '');
   const [salePrice, setSalePrice] = useState(item.sale_price?.toString() || '');
   const [notes, setNotes] = useState(item.notes || '');
+  const [selectedWishlistId, setSelectedWishlistId] = useState<number>(item.wishlist_id);
   const [selectedTags, setSelectedTags] = useState<string[]>(
     item.tags?.map(tag => tag.name) || []
   );
@@ -26,6 +27,11 @@ export default function EditItemModal({ item, onClose }: EditItemModalProps) {
   const { data: existingTags } = useQuery({
     queryKey: ['tags'],
     queryFn: tagsApi.getAll,
+  });
+
+  const { data: wishlists } = useQuery({
+    queryKey: ['wishlists'],
+    queryFn: wishlistsApi.getAll,
   });
 
   const { data: items } = useQuery({
@@ -53,7 +59,14 @@ export default function EditItemModal({ item, onClose }: EditItemModalProps) {
   const updateItemMutation = useMutation({
     mutationFn: (data: any) => itemsApi.update(item.id, data),
     onSuccess: () => {
+      // Invalidate old wishlist items
       queryClient.invalidateQueries({ queryKey: ['items', item.wishlist_id] });
+      // If moved to a different wishlist, invalidate that one too
+      if (selectedWishlistId !== item.wishlist_id) {
+        queryClient.invalidateQueries({ queryKey: ['items', selectedWishlistId] });
+      }
+      // Also invalidate all-items view
+      queryClient.invalidateQueries({ queryKey: ['all-items'] });
       onClose();
     },
   });
@@ -72,6 +85,7 @@ export default function EditItemModal({ item, onClose }: EditItemModalProps) {
       sale_price: salePrice ? parseFloat(salePrice) : undefined,
       notes: notes.trim() || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
+      wishlist_id: selectedWishlistId !== item.wishlist_id ? selectedWishlistId : undefined,
     });
   };
 
@@ -206,6 +220,27 @@ export default function EditItemModal({ item, onClose }: EditItemModalProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          {/* Move to List */}
+          {wishlists && Array.isArray(wishlists) && wishlists.length > 1 && (
+            <div>
+              <label htmlFor="wishlist" className="block text-sm font-medium text-gray-700 mb-1">
+                Move to List
+              </label>
+              <select
+                id="wishlist"
+                value={selectedWishlistId}
+                onChange={(e) => setSelectedWishlistId(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {wishlists.map((list) => (
+                  <option key={list.id} value={list.id}>
+                    {list.name} {list.id === item.wishlist_id ? '(current)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

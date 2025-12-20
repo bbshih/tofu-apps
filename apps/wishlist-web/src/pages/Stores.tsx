@@ -979,12 +979,12 @@ function StoreFormModal({ title, store, onClose, onSubmit, isLoading }: StoreFor
                           onDragStart={(e) => {
                             const bookmarkletUrl = generatePolicyBookmarkletCode(bookmarkletToken, import.meta.env.VITE_API_URL || '/api');
                             e.dataTransfer.setData('text/uri-list', bookmarkletUrl);
-                            e.dataTransfer.setData('text/plain', 'Policy Grabber');
+                            e.dataTransfer.setData('text/plain', 'Policy');
                             e.dataTransfer.effectAllowed = 'copy';
                           }}
                           title="Policy Grabber"
                         >
-                          📋 Policy Grabber
+                          Policy
                         </a>
                         <button
                           type="button"

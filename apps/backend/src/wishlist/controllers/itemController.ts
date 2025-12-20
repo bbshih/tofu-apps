@@ -191,7 +191,7 @@ export const createItem = async (req: WishlistAuthRequest, res: Response) => {
 export const updateItem = async (req: WishlistAuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { product_name, brand, price, sale_price, notes, ranking, tags } = req.body;
+    const { product_name, brand, price, sale_price, notes, ranking, tags, wishlist_id } = req.body;
     const userId = req.user?.id;
 
     // Verify item belongs to user's wishlist
@@ -206,11 +206,26 @@ export const updateItem = async (req: WishlistAuthRequest, res: Response) => {
       return res.status(404).json({ _error: 'Item not found' });
     }
 
+    // If moving to a different wishlist, verify the target wishlist belongs to the user
+    if (wishlist_id !== undefined) {
+      const targetWishlistCheck = await query(
+        'SELECT id FROM wishlists WHERE id = $1 AND user_id = $2',
+        [wishlist_id, userId]
+      );
+      if (targetWishlistCheck.rows.length === 0) {
+        return res.status(404).json({ _error: 'Target wishlist not found' });
+      }
+    }
+
     // Build update query dynamically
     const updates: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
 
+    if (wishlist_id !== undefined) {
+      updates.push(`wishlist_id = $${paramCount++}`);
+      values.push(wishlist_id);
+    }
     if (product_name !== undefined) {
       updates.push(`product_name = $${paramCount++}`);
       values.push(product_name);

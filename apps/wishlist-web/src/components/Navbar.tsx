@@ -142,12 +142,12 @@ export default function Navbar() {
                             }}
                             onDragStart={(e) => {
                               e.dataTransfer.setData('text/uri-list', wishlistBookmarkletUrl);
-                              e.dataTransfer.setData('text/plain', 'Add to Wishlist');
+                              e.dataTransfer.setData('text/plain', '+ Wish');
                               e.dataTransfer.effectAllowed = 'copy';
                             }}
                             title="Add to Wishlist"
                           >
-                            + Add
+                            + Wish
                           </a>
                         </div>
                       </div>
@@ -168,12 +168,12 @@ export default function Navbar() {
                             }}
                             onDragStart={(e) => {
                               e.dataTransfer.setData('text/uri-list', policyBookmarkletUrl);
-                              e.dataTransfer.setData('text/plain', 'Policy Grabber');
+                              e.dataTransfer.setData('text/plain', 'Policy');
                               e.dataTransfer.effectAllowed = 'copy';
                             }}
                             title="Policy Grabber"
                           >
-                            Grab
+                            Policy
                           </a>
                         </div>
                       </div>
