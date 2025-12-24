@@ -87,7 +87,7 @@ export const getWishlistsByToken = async (req: Request, res: Response) => {
  */
 export const addItemViaBookmarklet = async (req: Request, res: Response) => {
   try {
-    const { token, url, wishlist_id } = req.body;
+    const { token, url, wishlist_id, scraped_data } = req.body;
 
     if (!token || !url || !wishlist_id) {
       return res.status(400).json({
@@ -135,30 +135,56 @@ export const addItemViaBookmarklet = async (req: Request, res: Response) => {
       image_path: null,
     };
 
-    // Scrape product data from URL
-    try {
-      const scrapedData = await scrapeProduct(url);
+    // Use client-scraped data if provided (from bookmarklet running in browser)
+    // This bypasses anti-bot protections like Amazon's CAPTCHA
+    if (scraped_data && (scraped_data.product_name || scraped_data.image_url)) {
       itemData = {
-        product_name: scrapedData.product_name || 'Unknown Product',
-        brand: scrapedData.brand,
-        price: scrapedData.price,
-        sale_price: scrapedData.sale_price,
-        currency: scrapedData.currency || 'USD',
-        site_name: scrapedData.site_name,
+        product_name: scraped_data.product_name || 'Unknown Product',
+        brand: scraped_data.brand || null,
+        price: scraped_data.price || null,
+        sale_price: scraped_data.sale_price || null,
+        currency: scraped_data.currency || 'USD',
+        site_name: new URL(url).hostname.replace(/^www\./, ''),
         image_path: null,
       };
 
-      // Download and save image
-      if (scrapedData.image_url) {
-        const savedImagePath = await downloadAndSaveImage(scrapedData.image_url);
-        if (savedImagePath) {
-          itemData.image_path = savedImagePath;
+      // Download and save image from client-provided URL
+      if (scraped_data.image_url) {
+        try {
+          const savedImagePath = await downloadAndSaveImage(scraped_data.image_url);
+          if (savedImagePath) {
+            itemData.image_path = savedImagePath;
+          }
+        } catch (imgError) {
+          console.error('Image download failed:', imgError);
         }
       }
-    } catch (scrapeError) {
-      console.error('Scraping failed:', scrapeError);
-      // Continue with default values if scraping fails
-      itemData.product_name = 'Product from ' + new URL(url).hostname;
+    } else {
+      // Fallback to server-side scraping for sites that don't block it
+      try {
+        const scrapedData = await scrapeProduct(url);
+        itemData = {
+          product_name: scrapedData.product_name || 'Unknown Product',
+          brand: scrapedData.brand,
+          price: scrapedData.price,
+          sale_price: scrapedData.sale_price,
+          currency: scrapedData.currency || 'USD',
+          site_name: scrapedData.site_name,
+          image_path: null,
+        };
+
+        // Download and save image
+        if (scrapedData.image_url) {
+          const savedImagePath = await downloadAndSaveImage(scrapedData.image_url);
+          if (savedImagePath) {
+            itemData.image_path = savedImagePath;
+          }
+        }
+      } catch (scrapeError) {
+        console.error('Scraping failed:', scrapeError);
+        // Continue with default values if scraping fails
+        itemData.product_name = 'Product from ' + new URL(url).hostname;
+      }
     }
 
     // Insert item
