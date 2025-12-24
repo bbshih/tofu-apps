@@ -145,7 +145,7 @@ export default function Navbar() {
                               e.dataTransfer.setData('text/plain', '+ Wish');
                               e.dataTransfer.effectAllowed = 'copy';
                             }}
-                            title="Add to Wishlist"
+                            title="+ Wish"
                           >
                             + Wish
                           </a>
@@ -171,7 +171,7 @@ export default function Navbar() {
                               e.dataTransfer.setData('text/plain', 'Policy');
                               e.dataTransfer.effectAllowed = 'copy';
                             }}
-                            title="Policy Grabber"
+                            title="Policy"
                           >
                             Policy
                           </a>

@@ -982,7 +982,7 @@ function StoreFormModal({ title, store, onClose, onSubmit, isLoading }: StoreFor
                             e.dataTransfer.setData('text/plain', 'Policy');
                             e.dataTransfer.effectAllowed = 'copy';
                           }}
-                          title="Policy Grabber"
+                          title="Policy"
                         >
                           Policy
                         </a>

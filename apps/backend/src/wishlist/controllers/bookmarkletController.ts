@@ -304,6 +304,67 @@ function cleanupPolicyCaptureCache() {
 }
 
 /**
+ * Create a new wishlist via bookmarklet (public endpoint)
+ */
+export const createListViaBookmarklet = async (req: Request, res: Response) => {
+  try {
+    const { token, name } = req.body;
+
+    if (!token || !name) {
+      return res.status(400).json({
+        error: 'Token and name are required',
+      });
+    }
+
+    // Validate name length
+    if (name.trim().length === 0 || name.length > 255) {
+      return res.status(400).json({
+        error: 'List name must be between 1 and 255 characters',
+      });
+    }
+
+    // Find user by token and check expiration
+    const userResult = await query(
+      'SELECT id, bookmarklet_token_created_at FROM users WHERE bookmarklet_token = $1',
+      [token]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid bookmarklet token' });
+    }
+
+    const user = userResult.rows[0];
+    const tokenAge = Date.now() - new Date(user.bookmarklet_token_created_at).getTime();
+    const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000;
+
+    if (tokenAge > ninetyDaysInMs) {
+      return res.status(401).json({
+        error: 'Bookmarklet token expired. Please regenerate from your dashboard.',
+      });
+    }
+
+    // Create the new wishlist
+    const wishlistResult = await query(
+      'INSERT INTO wishlists (user_id, name) VALUES ($1, $2) RETURNING id, name',
+      [user.id, name.trim()]
+    );
+
+    const wishlist = wishlistResult.rows[0];
+
+    res.status(201).json({
+      success: true,
+      wishlist: {
+        id: wishlist.id,
+        name: wishlist.name,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating wishlist via bookmarklet:', error);
+    res.status(500).json({ error: 'Failed to create wishlist' });
+  }
+};
+
+/**
  * Get captured policy result by session ID (public endpoint)
  * Frontend polls this after user clicks bookmarklet
  */

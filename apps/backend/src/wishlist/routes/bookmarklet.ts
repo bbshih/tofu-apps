@@ -6,6 +6,7 @@ import {
   generateBookmarkletToken,
   getWishlistsByToken,
   addItemViaBookmarklet,
+  createListViaBookmarklet,
   capturePolicyViaBookmarklet,
   getPolicyCaptureResult,
 } from '../controllers/bookmarkletController.js';
@@ -34,6 +35,7 @@ router.post('/generate-token', authenticateToken, generateBookmarkletToken);
 // Public endpoints for bookmarklet (token-based auth, allow any origin)
 router.get('/wishlists', bookmarkletCors, bookmarkletLimiter, getWishlistsByToken);
 router.post('/add-item', bookmarkletCors, bookmarkletLimiter, addItemViaBookmarklet);
+router.post('/create-list', bookmarkletCors, bookmarkletLimiter, createListViaBookmarklet);
 
 // Policy capture endpoints
 router.post('/capture-policy', bookmarkletCors, bookmarkletLimiter, capturePolicyViaBookmarklet);
