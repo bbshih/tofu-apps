@@ -101,12 +101,10 @@ describe('AddItemModal', () => {
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(itemsApi.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            wishlist_id: 1,
-            product_name: 'My Wish Item',
-          })
-        );
+        expect(itemsApi.create).toHaveBeenCalled();
+        const callArg = (itemsApi.create as any).mock.calls[0][0];
+        expect(callArg.wishlist_id).toBe(1);
+        expect(callArg.product_name).toBe('My Wish Item');
       });
     });
   });

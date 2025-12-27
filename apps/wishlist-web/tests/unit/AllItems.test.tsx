@@ -1,9 +1,12 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import AllItems from '../../src/pages/AllItems';
+import { itemsApi } from '../../src/api/items';
+import { wishlistsApi } from '../../src/api/wishlists';
 
 // Mock the auth hook
 vi.mock('../../src/hooks/useAuth', () => ({
@@ -97,11 +100,12 @@ describe('AllItems Page', () => {
       });
     });
 
-    it('shows back to wishlists link', async () => {
+    it('shows navigation back to dashboard', async () => {
       render(<AllItems />, { wrapper: createWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByText(/Back to Wishlists/i)).toBeInTheDocument();
+        // The navbar has "My Lists" link that goes back to the main page
+        expect(screen.getByRole('link', { name: /My Lists/i })).toBeInTheDocument();
       });
     });
 
@@ -170,10 +174,15 @@ describe('AllItems Page', () => {
         expect(screen.getByText('Wireless Headphones')).toBeInTheDocument();
       });
 
-      // Find delete buttons (there are multiple, one per item)
+      // First click the trash icon to show ItemCard's inline confirmation
       const deleteButtons = screen.getAllByTitle(/Remove item/i);
       fireEvent.click(deleteButtons[0]);
 
+      // Click the "Remove" button in the ItemCard's inline confirmation
+      const removeButton = await screen.findByRole('button', { name: /^Remove$/i });
+      fireEvent.click(removeButton);
+
+      // Now the page-level modal should appear
       await waitFor(() => {
         expect(screen.getByText('Confirm Delete')).toBeInTheDocument();
       });
@@ -189,8 +198,14 @@ describe('AllItems Page', () => {
       const deleteButtons = screen.getAllByTitle(/Remove item/i);
       fireEvent.click(deleteButtons[0]);
 
+      // Click through ItemCard confirmation
+      const removeButton = await screen.findByRole('button', { name: /^Remove$/i });
+      fireEvent.click(removeButton);
+
+      // Check that the modal shows the item name in the confirmation message
       await waitFor(() => {
-        expect(screen.getByText(/Wireless Headphones/)).toBeInTheDocument();
+        expect(screen.getByText('Confirm Delete')).toBeInTheDocument();
+        expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument();
       });
     });
 
@@ -204,12 +219,18 @@ describe('AllItems Page', () => {
       const deleteButtons = screen.getAllByTitle(/Remove item/i);
       fireEvent.click(deleteButtons[0]);
 
+      // Click through ItemCard confirmation
+      const removeButton = await screen.findByRole('button', { name: /^Remove$/i });
+      fireEvent.click(removeButton);
+
       await waitFor(() => {
         expect(screen.getByText('Confirm Delete')).toBeInTheDocument();
       });
 
-      const cancelButton = screen.getByRole('button', { name: /Cancel/i });
-      fireEvent.click(cancelButton);
+      // Cancel button is in the modal
+      const cancelButtons = screen.getAllByRole('button', { name: /Cancel/i });
+      const modalCancelButton = cancelButtons[cancelButtons.length - 1];
+      fireEvent.click(modalCancelButton);
 
       await waitFor(() => {
         expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument();
@@ -225,25 +246,34 @@ describe('AllItems Page', () => {
         expect(screen.getByText('Wireless Headphones')).toBeInTheDocument();
       });
 
+      // Click delete on first item
       const deleteButtons = screen.getAllByTitle(/Remove item/i);
       fireEvent.click(deleteButtons[0]);
 
+      // Click through ItemCard confirmation
+      const removeButton = await screen.findByRole('button', { name: /^Remove$/i });
+      fireEvent.click(removeButton);
+
+      // Wait for modal to appear
       await waitFor(() => {
         expect(screen.getByText('Confirm Delete')).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: /^Delete$/i });
+      // Click the Delete button in the modal - get all and use the last one (in the modal)
+      const allDeleteButtons = screen.getAllByRole('button', { name: /^Delete$/i });
+      const confirmButton = allDeleteButtons[allDeleteButtons.length - 1];
       fireEvent.click(confirmButton);
 
+      // Verify the API was called (React Query passes additional context as second arg)
       await waitFor(() => {
-        expect(itemsApi.delete).toHaveBeenCalledWith(1);
+        expect(itemsApi.delete).toHaveBeenCalled();
+        expect((itemsApi.delete as any).mock.calls[0][0]).toBe(1);
       });
     });
   });
 
   describe('Empty State', () => {
     it('shows empty state when no items', async () => {
-      const { wishlistsApi } = await import('../../src/api/wishlists');
       (wishlistsApi.getAllItems as any).mockResolvedValueOnce([]);
 
       render(<AllItems />, { wrapper: createWrapper() });
@@ -254,7 +284,6 @@ describe('AllItems Page', () => {
     });
 
     it('shows link to wishlists in empty state', async () => {
-      const { wishlistsApi } = await import('../../src/api/wishlists');
       (wishlistsApi.getAllItems as any).mockResolvedValueOnce([]);
 
       render(<AllItems />, { wrapper: createWrapper() });

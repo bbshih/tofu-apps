@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import Dashboard from '../../src/pages/Dashboard';
+import { wishlistsApi } from '../../src/api/wishlists';
 
 // Mock the auth hook
 vi.mock('../../src/hooks/useAuth', () => ({
@@ -245,20 +246,24 @@ describe('Dashboard', () => {
         expect(screen.getByText('Holiday Gifts')).toBeInTheDocument();
       });
 
+      // Click delete on first wishlist
       const deleteButtons = screen.getAllByRole('button', { name: /Delete/i });
       fireEvent.click(deleteButtons[0]);
 
+      // Wait for modal to appear
       await waitFor(() => {
         expect(screen.getByText('Confirm Delete')).toBeInTheDocument();
       });
 
-      // Find the delete confirmation button in modal
-      const confirmDeleteButtons = screen.getAllByRole('button', { name: /Delete/i });
-      const confirmButton = confirmDeleteButtons[confirmDeleteButtons.length - 1];
+      // Find the modal's delete button - get all Delete buttons and use the last one (in the modal)
+      const allDeleteButtons = screen.getAllByRole('button', { name: /^Delete$/i });
+      const confirmButton = allDeleteButtons[allDeleteButtons.length - 1];
       fireEvent.click(confirmButton);
 
+      // Verify the API was called (React Query passes additional context as second arg)
       await waitFor(() => {
-        expect(wishlistsApi.delete).toHaveBeenCalledWith(1);
+        expect(wishlistsApi.delete).toHaveBeenCalled();
+        expect((wishlistsApi.delete as any).mock.calls[0][0]).toBe(1);
       });
     });
   });
