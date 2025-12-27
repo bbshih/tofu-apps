@@ -42,8 +42,9 @@ describe('nlpDateParser', () => {
 
   describe('generateDateRange', () => {
     it('should generate weekend dates in range', () => {
-      const start = new Date('2025-01-15');
-      const end = new Date('2025-01-31');
+      // Use T12:00:00 to avoid timezone issues
+      const start = new Date('2025-01-15T12:00:00');
+      const end = new Date('2025-01-31T12:00:00');
       const weekends = generateDateRange(start, end, [6, 0]); // Sat, Sun
 
       expect(weekends.length).toBeGreaterThan(0);
@@ -54,8 +55,8 @@ describe('nlpDateParser', () => {
     });
 
     it('should generate weekday dates', () => {
-      const start = new Date('2025-01-15');
-      const end = new Date('2025-01-20');
+      const start = new Date('2025-01-15T12:00:00');
+      const end = new Date('2025-01-20T12:00:00');
       const weekdays = generateDateRange(start, end, [1, 2, 3, 4, 5]);
 
       weekdays.forEach((date) => {
@@ -66,11 +67,12 @@ describe('nlpDateParser', () => {
     });
 
     it('should handle single day selection', () => {
-      const start = new Date('2025-01-01');
-      const end = new Date('2025-01-31');
+      const start = new Date('2025-01-01T12:00:00');
+      const end = new Date('2025-01-31T12:00:00');
       const fridays = generateDateRange(start, end, [5]);
 
-      expect(fridays.length).toBe(5); // January 2025 has 5 Fridays
+      // January 2025 has Fridays on: 3, 10, 17, 24, 31 = 5 Fridays
+      expect(fridays.length).toBe(5);
       fridays.forEach((date) => {
         expect(date.getDay()).toBe(5);
       });
@@ -247,7 +249,8 @@ describe('nlpDateParser', () => {
 
   describe('formatDateOption', () => {
     it('should format date nicely', () => {
-      const date = new Date('2025-01-15');
+      // Use T12:00:00 to avoid timezone issues
+      const date = new Date('2025-01-15T12:00:00');
       const formatted = formatDateOption(date);
 
       expect(formatted).toMatch(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/);

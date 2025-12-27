@@ -1,9 +1,15 @@
 import React from 'react';
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import ItemCard from "../../src/components/ItemCard";
 import { Item } from "../../src/types";
+
+// Wrapper to provide Router context for components using react-router
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+};
 
 describe("ItemCard", () => {
   const mockItem: Item = {
@@ -29,7 +35,7 @@ describe("ItemCard", () => {
 
   it("renders product information correctly", () => {
     const mockDelete = vi.fn();
-    render(<ItemCard item={mockItem} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={mockItem} onDelete={mockDelete} />);
 
     expect(screen.getByText("Wireless Headphones")).toBeInTheDocument();
     expect(screen.getByText("TechBrand")).toBeInTheDocument();
@@ -39,7 +45,7 @@ describe("ItemCard", () => {
 
   it("displays discount percentage when on sale", () => {
     const mockDelete = vi.fn();
-    render(<ItemCard item={mockItem} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={mockItem} onDelete={mockDelete} />);
 
     expect(screen.getByText("20% off")).toBeInTheDocument();
     expect(screen.getByText(/\$99\.99/)).toBeInTheDocument();
@@ -47,7 +53,7 @@ describe("ItemCard", () => {
 
   it("renders tags", () => {
     const mockDelete = vi.fn();
-    render(<ItemCard item={mockItem} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={mockItem} onDelete={mockDelete} />);
 
     expect(screen.getByText("electronics")).toBeInTheDocument();
     expect(screen.getByText("audio")).toBeInTheDocument();
@@ -55,7 +61,7 @@ describe("ItemCard", () => {
 
   it("renders notes when present", () => {
     const mockDelete = vi.fn();
-    render(<ItemCard item={mockItem} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={mockItem} onDelete={mockDelete} />);
 
     expect(screen.getByText("Great sound quality")).toBeInTheDocument();
   });
@@ -63,7 +69,7 @@ describe("ItemCard", () => {
   it("calls onDelete when remove button is clicked", async () => {
     const user = userEvent.setup();
     const mockDelete = vi.fn();
-    render(<ItemCard item={mockItem} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={mockItem} onDelete={mockDelete} />);
 
     // First click shows the confirmation
     const removeButton = screen.getByTitle("Remove item");
@@ -83,7 +89,7 @@ describe("ItemCard", () => {
       sale_price: 79.99,
     };
     const mockDelete = vi.fn();
-    render(<ItemCard item={itemWithoutSale} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={itemWithoutSale} onDelete={mockDelete} />);
 
     // USD is converted to $ symbol
     expect(screen.getByText(/\$79\.99/)).toBeInTheDocument();
@@ -96,7 +102,7 @@ describe("ItemCard", () => {
       tags: [],
     };
     const mockDelete = vi.fn();
-    render(<ItemCard item={itemWithoutTags} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={itemWithoutTags} onDelete={mockDelete} />);
 
     expect(screen.queryByText("electronics")).not.toBeInTheDocument();
   });
@@ -107,14 +113,14 @@ describe("ItemCard", () => {
       notes: undefined,
     };
     const mockDelete = vi.fn();
-    render(<ItemCard item={itemWithoutNotes} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={itemWithoutNotes} onDelete={mockDelete} />);
 
     expect(screen.queryByText("Great sound quality")).not.toBeInTheDocument();
   });
 
   it("has correct product link", () => {
     const mockDelete = vi.fn();
-    render(<ItemCard item={mockItem} onDelete={mockDelete} />);
+    renderWithRouter(<ItemCard item={mockItem} onDelete={mockDelete} />);
 
     const productLinks = screen.getAllByRole("link");
     const productLink = productLinks.find(link => link.getAttribute("href") === mockItem.original_url);
@@ -145,14 +151,14 @@ describe("ItemCard", () => {
 
     it("renders item without URL correctly", () => {
       const mockDelete = vi.fn();
-      render(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
+      renderWithRouter(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
 
       expect(screen.getByText("Wish Item Without URL")).toBeInTheDocument();
     });
 
     it("does not render clickable link for product name when no URL", () => {
       const mockDelete = vi.fn();
-      render(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
+      renderWithRouter(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
 
       // The product name should be a heading, not a link
       const productName = screen.getByText("Wish Item Without URL");
@@ -165,7 +171,7 @@ describe("ItemCard", () => {
 
     it("does not render clickable image when no URL", () => {
       const mockDelete = vi.fn();
-      render(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
+      renderWithRouter(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
 
       // The image area should not be wrapped in a link
       const noImageText = screen.getByText("No Image");
@@ -175,14 +181,14 @@ describe("ItemCard", () => {
 
     it("renders notes for item without URL", () => {
       const mockDelete = vi.fn();
-      render(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
+      renderWithRouter(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
 
       expect(screen.getByText("Just an idea for now")).toBeInTheDocument();
     });
 
     it("still shows delete button for items without URL", () => {
       const mockDelete = vi.fn();
-      render(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
+      renderWithRouter(<ItemCard item={itemWithoutUrl} onDelete={mockDelete} />);
 
       const removeButton = screen.getByTitle(/Remove item/i);
       expect(removeButton).toBeInTheDocument();

@@ -37,26 +37,27 @@ describe('dateHelpers', () => {
 
   describe('generateDatesInRange', () => {
     it('should generate weekend dates', () => {
-      const start = new Date('2025-01-01');
-      const end = new Date('2025-01-31');
+      // Use T12:00:00 to avoid timezone issues
+      const start = new Date('2025-01-01T12:00:00');
+      const end = new Date('2025-01-31T12:00:00');
       const dates = generateDatesInRange(start, end, DayPatterns.WEEKENDS);
 
       expect(dates.length).toBeGreaterThan(0);
       dates.forEach((isoDate) => {
         expect(isoDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-        const date = new Date(isoDate + 'T00:00:00');
+        const date = new Date(isoDate + 'T12:00:00');
         expect([0, 6]).toContain(date.getDay());
       });
     });
 
     it('should generate weekday dates', () => {
-      const start = new Date('2025-01-01');
-      const end = new Date('2025-01-31');
+      const start = new Date('2025-01-01T12:00:00');
+      const end = new Date('2025-01-31T12:00:00');
       const dates = generateDatesInRange(start, end, DayPatterns.WEEKDAYS);
 
       expect(dates.length).toBeGreaterThan(0);
       dates.forEach((isoDate) => {
-        const date = new Date(isoDate + 'T00:00:00');
+        const date = new Date(isoDate + 'T12:00:00');
         const day = date.getDay();
         expect(day).toBeGreaterThanOrEqual(1);
         expect(day).toBeLessThanOrEqual(5);
@@ -64,39 +65,41 @@ describe('dateHelpers', () => {
     });
 
     it('should generate specific days', () => {
-      const start = new Date('2025-01-01');
-      const end = new Date('2025-01-31');
+      const start = new Date('2025-01-01T12:00:00');
+      const end = new Date('2025-01-31T12:00:00');
       const dates = generateDatesInRange(start, end, [5]); // Fridays only
 
-      expect(dates.length).toBe(5); // January 2025 has 5 Fridays
+      // January 2025 has Fridays on: 3, 10, 17, 24, 31 = 5 Fridays
+      expect(dates.length).toBe(5);
       dates.forEach((isoDate) => {
-        const date = new Date(isoDate + 'T00:00:00');
+        const date = new Date(isoDate + 'T12:00:00');
         expect(date.getDay()).toBe(5);
       });
     });
 
     it('should handle Fri-Sun pattern', () => {
-      const start = new Date('2025-01-01');
-      const end = new Date('2025-01-31');
+      const start = new Date('2025-01-01T12:00:00');
+      const end = new Date('2025-01-31T12:00:00');
       const dates = generateDatesInRange(start, end, DayPatterns.FRI_SUN);
 
       dates.forEach((isoDate) => {
-        const date = new Date(isoDate + 'T00:00:00');
+        const date = new Date(isoDate + 'T12:00:00');
         expect([5, 6, 0]).toContain(date.getDay());
       });
     });
 
     it('should handle empty days array', () => {
-      const start = new Date('2025-01-01');
-      const end = new Date('2025-01-31');
+      const start = new Date('2025-01-01T12:00:00');
+      const end = new Date('2025-01-31T12:00:00');
       const dates = generateDatesInRange(start, end, []);
 
       expect(dates).toEqual([]);
     });
 
     it('should handle single day range', () => {
-      const start = new Date('2025-01-15');
-      const end = new Date('2025-01-15');
+      // Jan 15, 2025 is a Wednesday
+      const start = new Date('2025-01-15T12:00:00');
+      const end = new Date('2025-01-15T12:00:00');
       const dates = generateDatesInRange(start, end, DayPatterns.ALL_DAYS);
 
       expect(dates.length).toBe(1);
@@ -123,8 +126,8 @@ describe('dateHelpers', () => {
 
   describe('generateDateOptions', () => {
     it('should generate array of DateOptions', () => {
-      const start = new Date('2025-01-01');
-      const end = new Date('2025-01-07');
+      const start = new Date('2025-01-01T12:00:00');
+      const end = new Date('2025-01-07T12:00:00');
       const options = generateDateOptions(start, end, DayPatterns.WEEKENDS);
 
       expect(options.length).toBeGreaterThan(0);
@@ -139,11 +142,12 @@ describe('dateHelpers', () => {
 
   describe('parseDate', () => {
     it('should parse valid ISO date', () => {
+      // parseDate returns a UTC-based Date, so use UTC methods for verification
       const date = parseDate('2025-01-15');
       expect(date).toBeInstanceOf(Date);
-      expect(date?.getFullYear()).toBe(2025);
-      expect(date?.getMonth()).toBe(0);
-      expect(date?.getDate()).toBe(15);
+      expect(date?.getUTCFullYear()).toBe(2025);
+      expect(date?.getUTCMonth()).toBe(0);
+      expect(date?.getUTCDate()).toBe(15);
     });
 
     it('should parse MM/DD/YYYY format', () => {
@@ -382,39 +386,38 @@ describe('dateHelpers', () => {
 
   describe('edge cases and robustness', () => {
     it('should handle leap year', () => {
-      const start = new Date('2024-02-01');
-      const end = new Date('2024-02-29');
+      const start = new Date('2024-02-01T12:00:00');
+      const end = new Date('2024-02-29T12:00:00');
       const dates = generateDatesInRange(start, end, DayPatterns.ALL_DAYS);
 
       expect(dates.length).toBe(29);
     });
 
     it('should handle non-leap year', () => {
-      const start = new Date('2025-02-01');
-      const end = new Date('2025-02-28');
+      const start = new Date('2025-02-01T12:00:00');
+      const end = new Date('2025-02-28T12:00:00');
       const dates = generateDatesInRange(start, end, DayPatterns.ALL_DAYS);
 
       expect(dates.length).toBe(28);
     });
 
     it('should handle year boundaries', () => {
-      const start = new Date('2024-12-25');
-      const end = new Date('2025-01-05');
+      const start = new Date('2024-12-25T12:00:00');
+      const end = new Date('2025-01-05T12:00:00');
       const dates = generateDatesInRange(start, end, DayPatterns.ALL_DAYS);
 
       expect(dates.length).toBe(12); // Dec 25-31 (7) + Jan 1-5 (5)
     });
 
     it('should handle same start and end date', () => {
-      const start = new Date('2025-01-15');
-      const end = new Date('2025-01-15');
+      // Jan 15, 2025 is a Wednesday (day 3)
+      const start = new Date('2025-01-15T12:00:00');
+      const end = new Date('2025-01-15T12:00:00');
       const dates = generateDatesInRange(start, end, [3]); // Wednesday
 
-      if (start.getDay() === 3) {
-        expect(dates.length).toBe(1);
-      } else {
-        expect(dates.length).toBe(0);
-      }
+      // Jan 15, 2025 is indeed a Wednesday
+      expect(dates.length).toBe(1);
+      expect(dates[0]).toBe('2025-01-15');
     });
   });
 });
