@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { wishlistsApi } from '../api/wishlists';
@@ -6,6 +6,7 @@ import { itemsApi } from '../api/items';
 import ItemCard from '../components/ItemCard';
 import AddItemModal from '../components/AddItemModal';
 import Navbar from '../components/Navbar';
+import { setWishlistDetailPageTitle } from '../utils/metaTags';
 
 export default function WishlistDetail() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,12 @@ export default function WishlistDetail() {
     queryKey: ['wishlist', wishlistId],
     queryFn: () => wishlistsApi.getById(wishlistId),
   });
+
+  useEffect(() => {
+    if (wishlist?.name) {
+      setWishlistDetailPageTitle(wishlist.name);
+    }
+  }, [wishlist?.name]);
 
   const { data: items, isLoading } = useQuery({
     queryKey: ['items', wishlistId],

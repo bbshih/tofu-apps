@@ -6,8 +6,13 @@ import { communityPoliciesApi } from '../api/communityPolicies';
 import { bookmarkletApi, generatePolicyBookmarkletCode } from '../api/bookmarklet';
 import { Store, CreateStoreRequest, CommunityPolicy, PolicyScrapeResult } from '../types';
 import Navbar from '../components/Navbar';
+import { setStoresPageTitle } from '../utils/metaTags';
 
 export default function Stores() {
+  useEffect(() => {
+    setStoresPageTitle();
+  }, []);
+
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightedStore = searchParams.get('highlight');

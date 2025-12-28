@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { wishlistsApi } from '../api/wishlists';
 import Navbar from '../components/Navbar';
+import { setDashboardPageTitle } from '../utils/metaTags';
 
 export default function Dashboard() {
+  useEffect(() => {
+    setDashboardPageTitle();
+  }, []);
+
   const [newListName, setNewListName] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);

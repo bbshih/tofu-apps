@@ -45,6 +45,20 @@ export function setBookmarkletPageTitle() {
 }
 
 /**
+ * Title for all items page
+ */
+export function setAllItemsPageTitle() {
+  setPageTitle("All Items - Wishlist");
+}
+
+/**
+ * Title for stores page
+ */
+export function setStoresPageTitle() {
+  setPageTitle("Stores - Wishlist");
+}
+
+/**
  * Reset to default title
  */
 export function resetPageTitle() {
