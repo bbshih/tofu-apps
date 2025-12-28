@@ -23,7 +23,10 @@ export default function Login() {
     try {
       const data = await authApi.login(email, password);
       login(data.user, data.token);
-      navigate('/');
+      // Redirect to saved location or default to home
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
+      sessionStorage.removeItem('redirectAfterLogin');
+      navigate(redirectPath);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to login');
     } finally {

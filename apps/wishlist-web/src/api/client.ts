@@ -25,6 +25,11 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
+      // Save the current location to redirect back after login
+      const currentPath = window.location.pathname + window.location.search;
+      if (currentPath !== '/login' && currentPath !== '/register') {
+        sessionStorage.setItem('redirectAfterLogin', currentPath);
+      }
       window.location.href = '/login';
     }
     return Promise.reject(error);
