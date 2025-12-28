@@ -56,7 +56,7 @@ export default function Navbar() {
     : '';
 
   const policyBookmarkletUrl = tokenData
-    ? generatePolicyBookmarkletCode(tokenData.token, import.meta.env.VITE_API_URL || '/api')
+    ? generatePolicyBookmarkletCode(tokenData.token, getApiUrl() + '/api/wishlist')
     : '';
 
   const isActive = (path: string) => location.pathname === path;

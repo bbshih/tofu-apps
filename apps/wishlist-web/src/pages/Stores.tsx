@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { storesApi } from '../api/stores';
 import { communityPoliciesApi } from '../api/communityPolicies';
 import { bookmarkletApi, generatePolicyBookmarkletCode } from '../api/bookmarklet';
+import { getApiUrl } from '../utils/bookmarklet';
 import { Store, CreateStoreRequest, CommunityPolicy, PolicyScrapeResult } from '../types';
 import Navbar from '../components/Navbar';
 import { setStoresPageTitle } from '../utils/metaTags';
@@ -975,14 +976,14 @@ function StoreFormModal({ title, store, onClose, onSubmit, isLoading }: StoreFor
                       <p className="text-sm text-amber-800 font-medium mb-2">Step 1: Drag this button to your bookmarks bar:</p>
                       <div className="flex items-center gap-2 mb-2">
                         <a
-                          href={generatePolicyBookmarkletCode(bookmarkletToken, import.meta.env.VITE_API_URL || '/api')}
+                          href={generatePolicyBookmarkletCode(bookmarkletToken, getApiUrl() + '/api/wishlist')}
                           className="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 cursor-move select-none text-sm font-medium"
                           onClick={(e) => {
                             e.preventDefault();
                             alert('Please drag this button to your bookmarks bar instead of clicking it.');
                           }}
                           onDragStart={(e) => {
-                            const bookmarkletUrl = generatePolicyBookmarkletCode(bookmarkletToken, import.meta.env.VITE_API_URL || '/api');
+                            const bookmarkletUrl = generatePolicyBookmarkletCode(bookmarkletToken, getApiUrl() + '/api/wishlist');
                             e.dataTransfer.setData('text/uri-list', bookmarkletUrl);
                             e.dataTransfer.setData('text/plain', 'Policy');
                             e.dataTransfer.effectAllowed = 'copy';
@@ -994,7 +995,7 @@ function StoreFormModal({ title, store, onClose, onSubmit, isLoading }: StoreFor
                         <button
                           type="button"
                           onClick={() => {
-                            navigator.clipboard.writeText(generatePolicyBookmarkletCode(bookmarkletToken, import.meta.env.VITE_API_URL || '/api'));
+                            navigator.clipboard.writeText(generatePolicyBookmarkletCode(bookmarkletToken, getApiUrl() + '/api/wishlist'));
                             alert('Bookmarklet code copied! Create a new bookmark and paste this as the URL.');
                           }}
                           className="px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300"
