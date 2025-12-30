@@ -59,6 +59,63 @@ export const generateBookmarkletScript = (apiUrl: string, token: string): string
         || document.querySelector('#imageBlockContainer img')?.src
         || document.querySelector('img.a-dynamic-image')?.src
         || document.querySelector('meta[property="og:image"]')?.content;
+
+    } else if (hostname.includes('ikea.')) {
+      // IKEA - uses utag_data analytics object for pricing
+      data.product_name = document.querySelector('h1.pip-header-section__title--big')?.textContent?.trim()
+        || document.querySelector('.pip-header-section__title')?.textContent?.trim()
+        || document.querySelector('meta[property="og:title"]')?.content
+        || document.title.split('-')[0]?.trim();
+      data.brand = 'IKEA';
+      data.image_url = document.querySelector('meta[property="og:image"]')?.content
+        || document.querySelector('.pip-image img')?.src;
+
+      // IKEA stores prices in utag_data global variable
+      if (window.utag_data) {
+        const prices = window.utag_data.product_prices || window.utag_data.price;
+        if (prices && prices[0]) {
+          data.sale_price = parseFloat(prices[0]);
+        }
+      }
+      // Fallback: try to find price in the DOM
+      if (!data.sale_price) {
+        const priceEl = document.querySelector('.pip-temp-price__integer, .pip-price__integer');
+        if (priceEl) {
+          const priceText = priceEl.textContent?.replace(/[^0-9.]/g, '');
+          if (priceText) data.sale_price = parseFloat(priceText);
+        }
+      }
+
+    } else if (hostname.includes('crateandbarrel.') || hostname.includes('cb2.')) {
+      // Crate & Barrel / CB2
+      data.product_name = document.querySelector('h1.product-name')?.textContent?.trim()
+        || document.querySelector('[data-testid="product-name"]')?.textContent?.trim()
+        || document.querySelector('meta[property="og:title"]')?.content
+        || document.title.split('|')[0]?.trim();
+      data.brand = hostname.includes('cb2.') ? 'CB2' : 'Crate & Barrel';
+      data.image_url = document.querySelector('meta[property="og:image"]')?.content;
+
+      // Try JSON-LD first
+      const jsonLd = document.querySelector('script[type="application/ld+json"]');
+      if (jsonLd) {
+        try {
+          const jsonData = JSON.parse(jsonLd.textContent || '{}');
+          const product = jsonData['@type'] === 'Product' ? jsonData : jsonData['@graph']?.find(i => i['@type'] === 'Product');
+          if (product?.offers) {
+            const offer = Array.isArray(product.offers) ? product.offers[0] : product.offers;
+            data.sale_price = parseFloat(offer.price || offer.lowPrice);
+          }
+        } catch (e) {}
+      }
+      // Fallback: DOM price
+      if (!data.sale_price) {
+        const priceEl = document.querySelector('.price-state-current, [data-testid="product-price"], .product-price');
+        if (priceEl) {
+          const priceText = priceEl.textContent?.replace(/[^0-9.]/g, '');
+          if (priceText) data.sale_price = parseFloat(priceText);
+        }
+      }
+
     } else {
       // Generic fallback using meta tags
       data.product_name = document.querySelector('meta[property="og:title"]')?.content
@@ -77,9 +134,40 @@ export const generateBookmarkletScript = (apiUrl: string, token: string): string
     return data;
   }
 
+  // Clean URL - remove tracking/referral params
+  function cleanUrl(url) {
+    try {
+      const u = new URL(url);
+      const paramsToRemove = [
+        // UTM params
+        'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
+        // Referral/affiliate
+        'ref', 'ref_', 'referrer', 'aff', 'affiliate', 'affid', 'partner', 'tag',
+        // Analytics/tracking
+        'fbclid', 'gclid', 'gclsrc', 'dclid', 'msclkid', 'twclid', 'igshid',
+        'mc_cid', 'mc_eid', '_ga', '_gl', 'yclid', 'ymclid',
+        // Social
+        'share', 'shared', 's', 'smid', 'smtyp',
+        // Misc tracking
+        'trk', 'trkInfo', 'trackingId', 'clickid', 'click_id', 'campaign_id',
+        'source', 'src', 'cid', 'ito', 'itok', 'icid', 'ICID',
+        // Amazon specific
+        'psc', 'pd_rd_i', 'pd_rd_r', 'pd_rd_w', 'pd_rd_wg', 'pf_rd_i', 'pf_rd_m',
+        'pf_rd_p', 'pf_rd_r', 'pf_rd_s', 'pf_rd_t', 'linkCode', 'linkId',
+        'creativeASIN', 'ascsubtag', 'sr', 'qid', 'sbo', 'spIA', 'sp_csd',
+        // IKEA
+        'itm_campaign', 'itm_element', 'itm_content', 'intcmp', 'icid'
+      ];
+      paramsToRemove.forEach(p => u.searchParams.delete(p));
+      return u.toString();
+    } catch (e) {
+      return url;
+    }
+  }
+
   // Scrape product data
   const scrapedData = scrapeProductFromPage();
-  const currentUrl = window.location.href;
+  const currentUrl = cleanUrl(window.location.href);
 
   // Build popup URL
   const popupUrl = API_URL + '/bookmarklet-add?token=' + encodeURIComponent(TOKEN)
