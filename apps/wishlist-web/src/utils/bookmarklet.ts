@@ -116,6 +116,46 @@ export const generateBookmarkletScript = (apiUrl: string, token: string): string
         }
       }
 
+    } else if (hostname.includes('wayfair.')) {
+      // Wayfair - uses JSON-LD structured data
+      data.product_name = document.querySelector('h1[data-hb-id="Heading"]')?.textContent?.trim()
+        || document.querySelector('meta[property="og:title"]')?.content
+        || document.title.split('|')[0]?.trim();
+      data.brand = 'Wayfair';
+      data.image_url = document.querySelector('meta[property="og:image"]')?.content;
+
+      // Try to get brand from the page
+      const brandEl = document.querySelector('a[data-hb-id="Link"][href*="/brand/"]');
+      if (brandEl) {
+        data.brand = brandEl.textContent?.trim() || 'Wayfair';
+      }
+
+      // Try JSON-LD for price
+      const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      for (const script of jsonLdScripts) {
+        try {
+          const jsonData = JSON.parse(script.textContent || '{}');
+          if (jsonData['@type'] === 'Product' && jsonData.offers) {
+            const offer = Array.isArray(jsonData.offers) ? jsonData.offers[0] : jsonData.offers;
+            data.sale_price = parseFloat(offer.price || offer.lowPrice);
+            if (offer.highPrice && offer.highPrice !== offer.price) {
+              data.price = parseFloat(offer.highPrice);
+            }
+            break;
+          }
+        } catch (e) {}
+      }
+
+      // Fallback: DOM price
+      if (!data.sale_price) {
+        const priceEl = document.querySelector('[data-test-id="PriceDisplay"]')
+          || document.querySelector('.BasePriceBlock');
+        if (priceEl) {
+          const priceText = priceEl.textContent?.replace(/[^0-9.]/g, '');
+          if (priceText) data.sale_price = parseFloat(priceText);
+        }
+      }
+
     } else {
       // Generic fallback using meta tags
       data.product_name = document.querySelector('meta[property="og:title"]')?.content

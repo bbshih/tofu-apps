@@ -39,8 +39,16 @@ export default function BookmarkletAdd() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [status, setStatus] = useState<{ type: 'idle' | 'loading' | 'success' | 'error'; message: string }>({ type: 'idle', message: '' });
 
-  // Parse scraped data from URL
-  const scrapedData: ScrapedData = dataParam ? JSON.parse(decodeURIComponent(dataParam)) : {};
+  // Parse scraped data from URL - useSearchParams already decodes, so don't double-decode
+  const scrapedData: ScrapedData = (() => {
+    if (!dataParam) return {};
+    try {
+      return JSON.parse(dataParam);
+    } catch (e) {
+      console.error('Failed to parse scraped data:', e, 'Raw data:', dataParam);
+      return {};
+    }
+  })();
 
   // Check if item already exists
   const { data: existingData, isLoading: checkingExisting } = useQuery({
