@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import WishlistDetail from './pages/WishlistDetail';
 import Bookmarklet from './pages/Bookmarklet';
+import BookmarkletAdd from './pages/BookmarkletAdd';
 import AllItems from './pages/AllItems';
 import Stores from './pages/Stores';
 
@@ -91,6 +92,8 @@ function App() {
                 </PrivateRoute>
               }
             />
+            {/* Bookmarklet popup - uses token auth, not session */}
+            <Route path="/bookmarklet-add" element={<BookmarkletAdd />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
