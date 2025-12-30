@@ -391,6 +391,214 @@ export const createListViaBookmarklet = async (req: Request, res: Response) => {
 };
 
 /**
+ * Check if item with URL already exists for user (public endpoint)
+ */
+export const checkExistingItem = async (req: Request, res: Response) => {
+  try {
+    const { token, url } = req.query;
+
+    if (!token || !url) {
+      return res.status(400).json({ error: 'Token and URL are required' });
+    }
+
+    // Find user by token and check expiration
+    const userResult = await query(
+      'SELECT id, bookmarklet_token_created_at FROM users WHERE bookmarklet_token = $1',
+      [token]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid bookmarklet token' });
+    }
+
+    const user = userResult.rows[0];
+    const tokenAge = Date.now() - new Date(user.bookmarklet_token_created_at).getTime();
+    const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000;
+
+    if (tokenAge > ninetyDaysInMs) {
+      return res.status(401).json({
+        error: 'Bookmarklet token expired. Please regenerate from your dashboard.',
+      });
+    }
+
+    // Check if item with this URL exists for this user (across all wishlists)
+    const existingResult = await query(
+      `SELECT i.*, w.name as wishlist_name
+       FROM items i
+       JOIN wishlists w ON i.wishlist_id = w.id
+       WHERE w.user_id = $1 AND i.original_url = $2
+       ORDER BY i.created_at DESC
+       LIMIT 1`,
+      [user.id, url]
+    );
+
+    if (existingResult.rows.length > 0) {
+      const item = existingResult.rows[0];
+      return res.json({
+        exists: true,
+        item: {
+          id: item.id,
+          product_name: item.product_name,
+          brand: item.brand,
+          price: item.price,
+          sale_price: item.sale_price,
+          currency: item.currency,
+          image_path: item.image_path,
+          wishlist_id: item.wishlist_id,
+          wishlist_name: item.wishlist_name,
+          original_url: item.original_url,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+        },
+      });
+    }
+
+    res.json({ exists: false });
+  } catch (error) {
+    console.error('Error checking existing item:', error);
+    res.status(500).json({ error: 'Failed to check existing item' });
+  }
+};
+
+/**
+ * Update existing item via bookmarklet (public endpoint)
+ */
+export const updateItemViaBookmarklet = async (req: Request, res: Response) => {
+  try {
+    const { token, item_id, scraped_data, move_to_wishlist_id } = req.body;
+
+    if (!token || !item_id) {
+      return res.status(400).json({
+        error: 'Token and item_id are required',
+      });
+    }
+
+    // Find user by token and check expiration
+    const userResult = await query(
+      'SELECT id, bookmarklet_token_created_at FROM users WHERE bookmarklet_token = $1',
+      [token]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid bookmarklet token' });
+    }
+
+    const user = userResult.rows[0];
+    const tokenAge = Date.now() - new Date(user.bookmarklet_token_created_at).getTime();
+    const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000;
+
+    if (tokenAge > ninetyDaysInMs) {
+      return res.status(401).json({
+        error: 'Bookmarklet token expired. Please regenerate from your dashboard.',
+      });
+    }
+
+    // Verify item belongs to user
+    const itemResult = await query(
+      `SELECT i.* FROM items i
+       JOIN wishlists w ON i.wishlist_id = w.id
+       WHERE i.id = $1 AND w.user_id = $2`,
+      [item_id, user.id]
+    );
+
+    if (itemResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    const existingItem = itemResult.rows[0];
+
+    // Build update fields
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramCount = 1;
+
+    if (scraped_data) {
+      if (scraped_data.product_name !== undefined) {
+        updates.push(`product_name = $${paramCount++}`);
+        values.push(scraped_data.product_name);
+      }
+      if (scraped_data.brand !== undefined) {
+        updates.push(`brand = $${paramCount++}`);
+        values.push(scraped_data.brand);
+      }
+      if (scraped_data.price !== undefined) {
+        updates.push(`price = $${paramCount++}`);
+        values.push(scraped_data.price);
+      }
+      if (scraped_data.sale_price !== undefined) {
+        updates.push(`sale_price = $${paramCount++}`);
+        values.push(scraped_data.sale_price);
+      }
+      if (scraped_data.currency !== undefined) {
+        updates.push(`currency = $${paramCount++}`);
+        values.push(scraped_data.currency);
+      }
+
+      // Handle image update
+      if (scraped_data.image_url) {
+        try {
+          const savedImagePath = await downloadAndSaveImage(scraped_data.image_url);
+          if (savedImagePath) {
+            updates.push(`image_path = $${paramCount++}`);
+            values.push(savedImagePath);
+          }
+        } catch (imgError) {
+          console.error('Image download failed:', imgError);
+        }
+      }
+    }
+
+    // Handle wishlist move
+    if (move_to_wishlist_id !== undefined) {
+      // Verify target wishlist belongs to user
+      const targetWishlistResult = await query(
+        'SELECT id FROM wishlists WHERE id = $1 AND user_id = $2',
+        [move_to_wishlist_id, user.id]
+      );
+
+      if (targetWishlistResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Target wishlist not found' });
+      }
+
+      updates.push(`wishlist_id = $${paramCount++}`);
+      values.push(move_to_wishlist_id);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    // Add updated_at
+    updates.push(`updated_at = $${paramCount++}`);
+    values.push(new Date());
+
+    // Add item_id for WHERE clause
+    values.push(item_id);
+
+    const updateQuery = `UPDATE items SET ${updates.join(', ')} WHERE id = $${paramCount} RETURNING *`;
+    const updatedResult = await query(updateQuery, values);
+
+    const updatedItem = updatedResult.rows[0];
+
+    res.json({
+      success: true,
+      item: {
+        id: updatedItem.id,
+        product_name: updatedItem.product_name,
+        brand: updatedItem.brand,
+        price: updatedItem.price,
+        sale_price: updatedItem.sale_price,
+        image_path: updatedItem.image_path,
+        wishlist_id: updatedItem.wishlist_id,
+      },
+    });
+  } catch (error) {
+    console.error('Error updating item via bookmarklet:', error);
+    res.status(500).json({ error: 'Failed to update item' });
+  }
+};
+
+/**
  * Get captured policy result by session ID (public endpoint)
  * Frontend polls this after user clicks bookmarklet
  */
