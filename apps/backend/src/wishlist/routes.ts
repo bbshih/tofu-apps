@@ -31,15 +31,18 @@ const imageLimiter = rateLimit({
 
 router.use('/uploads', imageLimiter, (req, res, next) => {
   // Validate filename to prevent path traversal
+  // Allows: {32-char-hex}.jpg, {32-char-hex}.webp, {32-char-hex}_thumb.webp
   const filename = path.basename(req.path);
-  if (!/^[a-f0-9]{32}\.jpg$/.test(filename)) {
+  if (!/^[a-f0-9]{32}(_thumb)?\.(jpg|webp)$/.test(filename)) {
     return res.status(400).json({ error: 'Invalid filename' });
   }
 
-  // Set security headers
+  // Set security headers and appropriate content type
+  const contentType = filename.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
   res.set({
     'X-Content-Type-Options': 'nosniff',
-    'Cache-Control': 'public, max-age=86400', // 24 hours for public images
+    'Cache-Control': 'public, max-age=31536000, immutable', // 1 year for immutable hashed files
+    'Content-Type': contentType,
   });
 
   express.static(uploadDir, {
