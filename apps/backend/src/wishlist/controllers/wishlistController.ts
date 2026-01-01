@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { query } from '../db.js';
 import { WishlistAuthRequest } from '../types/index.js';
+import { getThumbnailPath } from '../utils/imageDownloader.js';
 
 export const getAllWishlists = async (req: WishlistAuthRequest, res: Response) => {
   try {
@@ -33,7 +34,15 @@ export const getAllWishlists = async (req: WishlistAuthRequest, res: Response) =
       [userId]
     );
 
-    res.json(result.rows);
+    // Convert preview images to thumbnail paths
+    const wishlists = result.rows.map(wishlist => ({
+      ...wishlist,
+      preview_images: wishlist.preview_images
+        ? wishlist.preview_images.map((img: string) => getThumbnailPath(img))
+        : [],
+    }));
+
+    res.json(wishlists);
   } catch (_error) {
     console.error('Error fetching wishlists:', _error);
     res.status(500).json({ _error: 'Failed to fetch wishlists' });

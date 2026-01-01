@@ -8,6 +8,12 @@ import { URL } from 'url';
 const UPLOAD_DIR = process.env.WISHLIST_UPLOAD_DIR || './uploads';
 const MAX_IMAGE_SIZE = parseInt(process.env.MAX_IMAGE_SIZE || '5242880'); // 5MB default
 
+// Image optimization settings
+const MAIN_IMAGE_SIZE = 800;
+const THUMBNAIL_SIZE = 200;
+const WEBP_QUALITY = 82; // WebP is more efficient, can use slightly lower quality
+const THUMBNAIL_QUALITY = 75;
+
 // Allowed protocols and blocked hosts for SSRF prevention
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 const BLOCKED_HOSTS = [
@@ -73,25 +79,55 @@ export async function downloadAndSaveImage(imageUrl: string): Promise<string | n
 
     // Generate unique filename
     const hash = crypto.randomBytes(16).toString('hex');
-    const ext = '.jpg'; // We'll convert everything to JPEG
-    const filename = `${hash}${ext}`;
+    const filename = `${hash}.webp`;
+    const thumbFilename = `${hash}_thumb.webp`;
     const filepath = path.join(UPLOAD_DIR, filename);
+    const thumbFilepath = path.join(UPLOAD_DIR, thumbFilename);
 
-    // Process and optimize image
-    await sharp(response.data)
-      .resize(800, 800, {
+    // Load image once for both operations
+    const image = sharp(response.data);
+
+    // Process and save main image as WebP
+    await image
+      .clone()
+      .resize(MAIN_IMAGE_SIZE, MAIN_IMAGE_SIZE, {
         fit: 'inside',
         withoutEnlargement: true,
       })
-      .jpeg({
-        quality: 85,
-        progressive: true,
+      .webp({
+        quality: WEBP_QUALITY,
+        effort: 4, // Balance between compression and speed
       })
       .toFile(filepath);
+
+    // Generate and save thumbnail
+    await image
+      .clone()
+      .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
+        fit: 'cover', // Crop to fill for consistent thumbnail sizes
+        position: 'centre',
+      })
+      .webp({
+        quality: THUMBNAIL_QUALITY,
+        effort: 4,
+      })
+      .toFile(thumbFilepath);
 
     return filename;
   } catch (_error) {
     console.error('Error downloading image:', _error);
     return null;
   }
+}
+
+/**
+ * Get the thumbnail filename from a main image filename
+ * Handles both old .jpg files and new .webp files
+ */
+export function getThumbnailPath(imagePath: string): string {
+  if (imagePath.endsWith('.webp')) {
+    return imagePath.replace('.webp', '_thumb.webp');
+  }
+  // For old .jpg files, just return the original (no thumbnail exists)
+  return imagePath;
 }
