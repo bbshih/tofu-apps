@@ -14,6 +14,8 @@ export interface Wishlist {
   name: string;
   created_at: string;
   updated_at: string;
+  item_count?: number;
+  preview_images?: string[];
 }
 
 export interface Tag {

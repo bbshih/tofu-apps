@@ -171,17 +171,51 @@ export default function Dashboard() {
               {wishlists.map((wishlist) => (
                 <div
                   key={wishlist.id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden"
                 >
-                  <Link to={`/wishlist/${wishlist.id}`} className="block p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {wishlist.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Updated {new Date(wishlist.updated_at).toLocaleDateString()}
-                    </p>
+                  <Link to={`/wishlist/${wishlist.id}`} className="block">
+                    {/* Image preview grid */}
+                    <div className="h-32 bg-gray-100 relative">
+                      {wishlist.preview_images && wishlist.preview_images.length > 0 ? (
+                        <div className={`grid h-full ${
+                          wishlist.preview_images.length === 1 ? 'grid-cols-1' :
+                          wishlist.preview_images.length === 2 ? 'grid-cols-2' :
+                          wishlist.preview_images.length === 3 ? 'grid-cols-3' :
+                          'grid-cols-2 grid-rows-2'
+                        }`}>
+                          {wishlist.preview_images.slice(0, 4).map((imagePath: string, idx: number) => (
+                            <div key={idx} className="relative overflow-hidden bg-white">
+                              <img
+                                src={`/api/wishlist/uploads/${imagePath}`}
+                                alt=""
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-lg font-semibold text-gray-900 truncate">
+                          {wishlist.name}
+                        </h3>
+                        <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap ml-2">
+                          {wishlist.item_count} {wishlist.item_count === 1 ? 'item' : 'items'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        Updated {new Date(wishlist.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </Link>
-                  <div className="px-6 pb-4 flex gap-3">
+                  <div className="px-4 pb-3 flex gap-3 border-t border-gray-100 pt-2">
                     <button
                       onClick={() => handleEditClick(wishlist.id, wishlist.name)}
                       disabled={updateMutation.isPending}

@@ -5,8 +5,31 @@ import { WishlistAuthRequest } from '../types/index.js';
 export const getAllWishlists = async (req: WishlistAuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
+
+    // Get wishlists with item count and preview images (up to 4)
     const result = await query(
-      'SELECT * FROM wishlists WHERE user_id = $1 ORDER BY updated_at DESC',
+      `SELECT
+        w.*,
+        COALESCE(item_counts.count, 0)::int as item_count,
+        COALESCE(previews.images, '[]'::json) as preview_images
+      FROM wishlists w
+      LEFT JOIN (
+        SELECT wishlist_id, COUNT(*) as count
+        FROM items
+        GROUP BY wishlist_id
+      ) item_counts ON w.id = item_counts.wishlist_id
+      LEFT JOIN LATERAL (
+        SELECT json_agg(image_path) as images
+        FROM (
+          SELECT image_path
+          FROM items
+          WHERE wishlist_id = w.id AND image_path IS NOT NULL
+          ORDER BY ranking DESC, created_at DESC
+          LIMIT 4
+        ) sub
+      ) previews ON true
+      WHERE w.user_id = $1
+      ORDER BY w.updated_at DESC`,
       [userId]
     );
 
